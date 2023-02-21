@@ -33,3 +33,13 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+HEAD
+config
+description
+hooks/
+index
+info/
+objects/
+packed-refs
+refs/
