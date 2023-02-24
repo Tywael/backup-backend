@@ -34,7 +34,12 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
+.env
+
 HEAD
+COMMIT_EDITMSG
+FETCH_HEAD
+ORIG_HEAD
 config
 description
 hooks/
