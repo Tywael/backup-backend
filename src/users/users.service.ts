@@ -6,7 +6,7 @@ import { User } from '@prisma/client';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findOrCreate({ id, email, firstName, lastName, pseudo }: { id: string, email: string, firstName: string, lastName: string, pseudo: string }): Promise<any> {
+  async findOrCreate({ id, email, firstName, lastName, pseudo, fortyTwoId }: { id: string, email: string, firstName: string, lastName: string, pseudo: string, fortyTwoId: number }): Promise<any> {
     let user = await this.prisma.user.findUnique({
       where: {
         email,
@@ -19,7 +19,7 @@ export class UsersService {
           email,
           firstName,
           lastName,
-          fortyTwoId: id,
+          fortyTwoId,
           pseudo,
         },
       });
@@ -29,7 +29,7 @@ export class UsersService {
           id: user.id,
         },
         data: {
-          fortyTwoId: id,
+          fortyTwoId,
         },
       });
     }

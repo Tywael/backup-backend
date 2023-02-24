@@ -17,10 +17,11 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
   }
 
   async validate(accessToken: string, refreshToken: string, profile: any, done: (err: any, user: any, info?: any) => void) {
-    const { id, email, first_name, last_name, login } = profile;
+    const { id, email, first_name, last_name, login, forty_two_id } = profile;
     const user = await this.authService.findOrCreate({
       id,
       email,
+      fortyTwoId: forty_two_id,
       firstName: first_name,
       lastName: last_name,
       pseudo: login,

@@ -4,7 +4,7 @@
 
 Table User {
   id Int [pk, increment]
-  fortyTwoId String
+  fortyTwoId Int
   pseudo String [unique, not null]
   email String [unique, not null]
   firstName String

@@ -9,7 +9,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async findOrCreate({ id, email, firstName, lastName, pseudo }: { id: string, email: string, firstName: string, lastName: string, pseudo: string }): Promise<any> {
+  async findOrCreate({ id, email, firstName, lastName, pseudo, fortyTwoId}: { id: string, email: string, firstName: string, lastName: string, pseudo: string, fortyTwoId: number}): Promise<any> {
     let user = await this.prisma.user.findUnique({
       where: {
         email: email,
@@ -22,7 +22,7 @@ export class AuthService {
           email,
           firstName,
           lastName,
-          fortyTwoId: id,
+          fortyTwoId,
           pseudo,
         },
       });
@@ -32,7 +32,7 @@ export class AuthService {
           id: user.id,
         },
         data: {
-          fortyTwoId: id,
+          fortyTwoId,
         },
       });
     }
@@ -42,6 +42,13 @@ export class AuthService {
   
   createToken(user: any) {
     const payload = { email: user.email, sub: user.id};
-    return this.jwtService.sign(payload);
+    return {
+      access_token: this.jwtService.sign(
+        payload, 
+        {
+          secret: process.env.JWT_SECRET
+        }
+      ),
+    }
   }
 }
