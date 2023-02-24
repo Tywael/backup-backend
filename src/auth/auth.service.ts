@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma.service';
 
@@ -38,6 +39,26 @@ export class AuthService {
     }
   
     return user;
+  }
+
+  async logout(req: Request, res: Response, id: number) {
+    // Find current user
+    const findUser = await this.prisma.user.findUnique({
+      where: {
+        id
+      }
+    });
+
+    // Check user
+    if (!findUser) {
+      throw new BadRequestException("User not found.");
+    }
+
+    // TODO: set user as offline
+
+    // Delete jwt
+    res.clearCookie(process.env.JWT_NAME);
+    return res.status(200).send('Sign out succes!');
   }
   
   createToken(user: any) {

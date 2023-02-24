@@ -1,19 +1,20 @@
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, Res, UseGuards, ForbiddenException, Param } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { RequestWithUser } from '../interfaces/request-with-user.interface';
 import { AuthService } from './auth.service';
+import { PrismaService } from '../prisma.service';
 import axios from 'axios';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private prisma: PrismaService) {}
 
-  @Get('42')
+  @Get('login')
   @UseGuards(AuthGuard('42'))
   async loginWithFortyTwo(@Res() res: Response) {}
 
-  @Get('42/callback')
+  @Get('login/callback')
   async loginWithFortyTwoCallback(@Req() req: RequestWithUser, @Res() res: Response) {
     const { code } = req.query;
   
@@ -23,7 +24,7 @@ export class AuthController {
         client_id: process.env.FORTY_TWO_CLIENT_ID,
         client_secret: process.env.FORTY_TWO_CLIENT_SECRET,
         code: code,
-        redirect_uri: `${process.env.APP_URL}/auth/42/callback`,
+        redirect_uri: `${process.env.APP_URL}/auth/login/callback`,
       });
 
       const userDataResponse = await axios.get('https://api.intra.42.fr/v2/me', {
@@ -43,14 +44,26 @@ export class AuthController {
       });
 
       const token = this.authService.createToken(user);
+
+      // Check tocken
+      if (!token) {
+        throw new ForbiddenException('Forvidden, token is missing.');
+      }
+
       res.cookie(process.env.JWT_NAME, token, { httpOnly: true });
-      res.status(200).json({
-        message: "OAuth success!",
-        data: user
-      }).redirect('/');
+      return res.status(200).send({
+        msg: "OAuth success!",
+        data: user,
+        token
+      });
     } catch (error) {
       console.error(error);
       res.status(500).send('Error authenticating with 42 API');
     }
+  }
+
+  @Get('signout/:id')
+  async logout(@Req() req, @Res() res, @Param() params: { id: number }) {
+    return this.authService.logout(req, res, Number(params.id));
   }
 }
