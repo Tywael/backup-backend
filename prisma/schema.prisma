@@ -15,12 +15,132 @@ datasource db {
 }
 
 model User {
-  id         Int      @id @unique @default(autoincrement())
+  id         String     @id @unique @default(uuid())
   fortyTwoId Int?
-  pseudo     String   @unique
-  email      String   @unique
+  pseudo     String     @unique @db.VarChar(255)
+  email      String     @unique
   firstName  String?
   lastName   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  avatar     String?
+  about      String?
+  experience BigInt     @default(0)
+  status     UserStatus @default(OFFLINE)
+  role       UserRole   @default(USER)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  chats   UserChat[]
+  games   UserGame[]
+  friendRequest Friendship[]  @relation(name:"requester")
+  friends Friendship[]  @relation(name: "receiver")
+  blockers   User[]      @relation(name: "blocked")
+  blocked  User[]       @relation(name: "blocked")
+}
+
+model Friendship {
+  id         String     @id @unique @default(uuid())
+  accepted  Boolean     @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  user      User        @relation(name:"requester", fields: [userId], references: [id])
+  userId    String
+  friend    User        @relation(name:"receiver", fields: [friendId], references: [id])      
+  friendId  String
+
+  @@unique([userId, friendId])
+}
+
+model UserChat {
+  id         String     @id @unique @default(uuid())
+  status UserChatStatus @default(MEMBER)
+  permission UserChatPermission @default(COMPLIANT)
+  chat  Chat    @relation(fields: [chatId], references: [id])
+  chatId String
+  user   User    @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model Chat {
+  id   String  @id @unique @default(uuid())
+  name String? @db.VarChar(255)
+  type      ChatType @default(DIRECT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users   UserChat[]
+  messages Message[]
+}
+
+model Message {
+  id String @id @unique @default(uuid())
+  body      String
+  status    MessageStatus?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  chat      Chat  @relation(fields: [chatId], references: [id])
+  chatId    String
+}
+
+model UserGame {
+  id         String     @id @unique @default(uuid())
+  status     UserGameStatus?
+  score Int   @default(0)
+  game  Game    @relation(fields: [gameId], references: [id])
+  gameId String
+  user   User    @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model Game {
+  id String @id @unique @default(uuid())
+  status    GameStatus     @default(WAITING)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  users     UserGame[]
+}
+
+enum UserStatus {
+  ONLINE
+  OFFLINE
+  PLAYING
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum ChatType {
+  DIRECT
+  PRIVATE
+  PUBLIC
+  RESTRICTED
+}
+
+enum MessageStatus {
+  RECEIVED
+  SENT
+}
+
+enum GameStatus {
+  WAITING
+  INPROGRESS
+  FINISHED
+}
+
+enum UserChatStatus {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum UserGameStatus {
+  WINNER
+  LOSER
+  DRAW
+}
+
+enum UserChatPermission {
+  BANNED
+  MUTED
+  KICKED
+  COMPLIANT
 }
