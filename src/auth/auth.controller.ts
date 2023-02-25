@@ -3,12 +3,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { RequestWithUser } from '../interfaces/request-with-user.interface';
 import { AuthService } from './auth.service';
+import { UsersService } from '../users/users.service';
 import { PrismaService } from '../prisma.service';
 import axios from 'axios';
+import { UserStatus } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService, private prisma: PrismaService) {}
+  constructor(private authService: AuthService, private prisma: PrismaService, private usersService: UsersService) {}
 
   @Get('login')
   @UseGuards(AuthGuard('42'))
@@ -33,7 +35,7 @@ export class AuthController {
         },
       });
 
-      const { id, email, first_name, last_name, login } = userDataResponse.data;
+      const { id, email, first_name, last_name, login, image } = userDataResponse.data;
       const user = await this.authService.findOrCreate({
         id,
         email,
@@ -41,13 +43,20 @@ export class AuthController {
         lastName: last_name,
         fortyTwoId: id,
         pseudo: login,
+        avatar: image.versions.medium
       });
+
+      if (user) {
+        user.experience = user.experience.toString();
+        // Set user as ONLINE
+        this.usersService.updateUserStatus(user.id, UserStatus.ONLINE);
+      }
 
       const token = this.authService.createToken(user);
 
-      // Check tocken
+      // Check token
       if (!token) {
-        throw new ForbiddenException('Forvidden, token is missing.');
+        throw new ForbiddenException('Forbidden, token is missing.');
       }
 
       res.cookie(process.env.JWT_NAME, token, { httpOnly: true });
@@ -63,7 +72,9 @@ export class AuthController {
   }
 
   @Get('signout/:id')
-  async logout(@Req() req, @Res() res, @Param() params: { id: number }) {
-    return this.authService.logout(req, res, Number(params.id));
+  async logout(@Req() req, @Res() res, @Param() params: { id: string }) {
+    // Set user as OFFLINE
+    this.usersService.updateUserStatus(params.id, UserStatus.OFFLINE);
+    return this.authService.logout(req, res, params.id);
   }
 }

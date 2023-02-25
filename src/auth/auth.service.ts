@@ -10,7 +10,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async findOrCreate({ id, email, firstName, lastName, pseudo, fortyTwoId}: { id: string, email: string, firstName: string, lastName: string, pseudo: string, fortyTwoId: number}): Promise<any> {
+  async findOrCreate({ id, email, firstName, lastName, pseudo, fortyTwoId, avatar }: { id: string, email: string, firstName: string, lastName: string, pseudo: string, fortyTwoId: number, avatar: string}): Promise<any> {
     let user = await this.prisma.user.findUnique({
       where: {
         email: email,
@@ -25,6 +25,7 @@ export class AuthService {
           lastName,
           fortyTwoId,
           pseudo,
+          avatar,
         },
       });
     } else if (!user.fortyTwoId) {
@@ -41,7 +42,7 @@ export class AuthService {
     return user;
   }
 
-  async logout(req: Request, res: Response, id: number) {
+  async logout(req: Request, res: Response, id: string) {
     // Find current user
     const findUser = await this.prisma.user.findUnique({
       where: {
@@ -53,8 +54,6 @@ export class AuthService {
     if (!findUser) {
       throw new BadRequestException("User not found.");
     }
-
-    // TODO: set user as offline
 
     // Delete jwt
     res.clearCookie(process.env.JWT_NAME);

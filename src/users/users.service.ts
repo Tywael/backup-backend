@@ -1,17 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { User } from '@prisma/client';
+import { User, UserStatus } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
+  remove: any;
   constructor(private prisma: PrismaService) {}
 
-  async findOrCreate({ id, email, firstName, lastName, pseudo, fortyTwoId }: { id: string, email: string, firstName: string, lastName: string, pseudo: string, fortyTwoId: number }): Promise<any> {
+  async findOrCreate({ id, email, firstName, lastName, pseudo, fortyTwoId, avatar }: { id: string, email: string, firstName: string, lastName: string, pseudo: string, fortyTwoId: number, avatar: string }): Promise<any> {
     let user = await this.prisma.user.findUnique({
       where: {
         email,
       },
     });
+
+    if (user) {
+      user.experience = user.experience as unknown as bigint;
+    }
 
     if (!user) {
       user = await this.prisma.user.create({
@@ -21,6 +26,7 @@ export class UsersService {
           lastName,
           fortyTwoId,
           pseudo,
+          avatar
         },
       });
     } else if (!user.fortyTwoId) {
@@ -37,6 +43,14 @@ export class UsersService {
     return user;
   }
 
+  async updateUserStatus(userId: string, status: UserStatus): Promise<User> {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { status },
+    });
+    return user;
+  }
+
   async createUser(data: User): Promise<User> {
     return await this.prisma.user.create({ data });
   }
@@ -45,15 +59,15 @@ export class UsersService {
     return await this.prisma.user.findMany();
   }
 
-  async getUserById(userId: number): Promise<User> {
+  async getUserById(userId: string): Promise<User> {
     return await this.prisma.user.findUnique({ where: { id: userId } });
   }
 
-  async updateUser(userId: number, data: User): Promise<User> {
+  async updateUser(userId: string, data: User): Promise<User> {
     return await this.prisma.user.update({ where: { id: userId }, data });
   }
 
-  async deleteUser(userId: number): Promise<User> {
+  async deleteUser(userId: string): Promise<User> {
     return await this.prisma.user.delete({ where: { id: userId } });
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Patch, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
@@ -16,7 +16,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getUserById(@Param('id', ParseUUIDPipe) userId: string): Promise<User> {
-    return await this.usersService.getUserById(parseInt(userId, 10));
+    return await this.usersService.getUserById(userId);
   }
 
   @Post()
@@ -25,11 +25,16 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put(':id')
+  @Patch(':id')
   async updateUser(
     @Param('id', ParseUUIDPipe) userId: string,
     @Body() data: User,
   ): Promise<User> {
-    return await this.usersService.updateUser(parseInt(userId, 10), data);
+    return await this.usersService.updateUser(userId, data);
+  }
+
+  @Delete(':id')
+  remove(@Param('id', ParseUUIDPipe) userId: string): Promise<User> {
+    return this.usersService.deleteUser(userId);
   }
 }
