@@ -26,7 +26,7 @@ export class AuthController {
         client_id: process.env.FORTY_TWO_CLIENT_ID,
         client_secret: process.env.FORTY_TWO_CLIENT_SECRET,
         code: code,
-        redirect_uri: `${process.env.APP_URL}/auth/login/callback`,
+        redirect_uri: `${process.env.API_URL}/auth/login/callback`,
       });
 
       const userDataResponse = await axios.get('https://api.intra.42.fr/v2/me', {

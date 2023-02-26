@@ -11,7 +11,7 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
       tokenURL: 'https://api.intra.42.fr/oauth/token',
       clientID: process.env.FORTY_TWO_CLIENT_ID,
       clientSecret: process.env.FORTY_TWO_CLIENT_SECRET,
-      callbackURL: `${process.env.APP_URL}/auth/login/callback`,
+      callbackURL: `${process.env.API_URL}/auth/login/callback`,
       scope: ['public'],
     });
   }

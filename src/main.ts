@@ -16,11 +16,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
   
-  // Load .env file
+  // Load .env
   dotenv.config();
 
   app.enableCors({
-    origin: process.env.APP_URL,
+    origin: process.env.API_URL,
     credentials: true,
     allowedHeaders: 'Content-Type, Authorization',
     methods: 'GET,PUT,POST,DELETE',
