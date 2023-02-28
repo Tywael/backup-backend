@@ -48,3 +48,4 @@ info/
 objects/
 packed-refs
 refs/
+.setup

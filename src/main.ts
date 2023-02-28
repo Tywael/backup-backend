@@ -1,10 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import * as cookieParser from 'cookie-parser';
 import * as dotenv from 'dotenv';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
 
   // Swagger
   const config = new DocumentBuilder()
@@ -20,9 +22,9 @@ async function bootstrap() {
   dotenv.config();
 
   app.enableCors({
-    origin: process.env.API_URL,
+    origin: process.env.WEB_URL,
     credentials: true,
-    allowedHeaders: 'Content-Type, Authorization',
+    allowedHeaders: 'Content-Type, Authorization, Cookie',
     methods: 'GET,PUT,POST,DELETE',
   });
 

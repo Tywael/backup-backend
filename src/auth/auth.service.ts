@@ -42,6 +42,20 @@ export class AuthService {
     return user;
   }
 
+  async findUserById(id: string): Promise<any> {
+    const findUser = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!findUser) {
+      throw new BadRequestException('User not found.');
+    }
+
+    return findUser;
+  }
+
   async logout(req: Request, res: Response, id: string) {
     // Find current user
     const findUser = await this.prisma.user.findUnique({
@@ -59,6 +73,15 @@ export class AuthService {
     res.clearCookie(process.env.JWT_NAME);
     return res.status(200).send('Sign out succes!');
   }
+
+  verifyToken(token: string) {
+    if (!token) {
+      throw new BadRequestException('Token not found.');
+    }
+    return this.jwtService.verify(token, {
+      secret: process.env.JWT_SECRET,
+    });
+  }
   
   createToken(user: any) {
     const payload = { email: user.email, sub: user.id};
@@ -66,7 +89,8 @@ export class AuthService {
       access_token: this.jwtService.sign(
         payload, 
         {
-          secret: process.env.JWT_SECRET
+          secret: process.env.JWT_SECRET,
+          expiresIn: '1d',
         }
       ),
     }

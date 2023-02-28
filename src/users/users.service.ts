@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { User, UserStatus } from '@prisma/client';
 
@@ -41,6 +41,20 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async findUserById(id: string): Promise<any> {
+    const findUser = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!findUser) {
+      throw new BadRequestException('User not found.');
+    }
+
+    return findUser;
   }
 
   async updateUserStatus(userId: string, status: UserStatus): Promise<User> {
