@@ -69,8 +69,13 @@ export class AuthService {
       throw new BadRequestException("User not found.");
     }
 
-    // Delete jwt
-    res.clearCookie(process.env.JWT_NAME);
+    // Remove JWT token from cookie
+    res.cookie(process.env.JWT_NAME, '', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 0,
+    });
     return res.status(200).send('Sign out succes!');
   }
 

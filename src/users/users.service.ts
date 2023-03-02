@@ -70,7 +70,13 @@ export class UsersService {
   }
 
   async getAllUsers(): Promise<User[]> {
-    return await this.prisma.user.findMany();
+    const findUsers = await this.prisma.user.findMany();
+
+    if (!findUsers) {
+      throw new BadRequestException('No users found.');
+    }
+
+    return findUsers;
   }
 
   async getUserById(userId: string): Promise<User> {
