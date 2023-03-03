@@ -14,10 +14,6 @@ export class UsersService {
       },
     });
 
-    if (user) {
-      user.experience = user.experience as unknown as bigint;
-    }
-
     if (!user) {
       user = await this.prisma.user.create({
         data: {
@@ -80,8 +76,16 @@ export class UsersService {
   }
 
   async getUserById(userId: string): Promise<User> {
-    return await this.prisma.user.findUnique({ where: { id: userId } });
+    return await this.prisma.user.findFirst({ 
+      where: { 
+        OR: [
+          {id: userId},
+          {pseudo: userId}
+        ]
+      } 
+    });
   }
+
 
   async updateUser(userId: string, data: User): Promise<User> {
     return await this.prisma.user.update({ where: { id: userId }, data });

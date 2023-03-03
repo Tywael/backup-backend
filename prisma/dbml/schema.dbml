@@ -11,7 +11,7 @@ Table User {
   lastName String
   avatar String
   about String
-  experience BigInt [not null, default: 0]
+  experience Int [not null, default: 0]
   status UserStatus [not null, default: 'OFFLINE']
   role UserRole [not null, default: 'USER']
   createdAt DateTime [default: `now()`, not null]

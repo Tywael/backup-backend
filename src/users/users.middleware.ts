@@ -22,7 +22,6 @@ export class AuthMiddleware implements NestMiddleware {
       const user = await this.userService.findUserById(decodedToken.sub);
       if (user) {
         user.status = UserStatus.ONLINE;
-        user.experience = user.experience.toString();
         req.user = user;
       }
       next();

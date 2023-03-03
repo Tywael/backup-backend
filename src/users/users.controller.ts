@@ -21,11 +21,7 @@ export class UsersController {
       res.status(401).send({ message: 'Unauthorized' });
     } else {
       const users = await this.usersService.getAllUsers();
-      const formattedUsers = users.map(user => ({
-        ...user,
-        experience: user.experience.toString(),
-      }));
-      res.send({ users: formattedUsers });
+      res.send({ users });
     }
   }
 
@@ -41,10 +37,16 @@ export class UsersController {
   }
 
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async getUserById(@Param('id', ParseUUIDPipe) userId: string): Promise<User> {
-    return await this.usersService.getUserById(userId);
+  async getUserById(@Param('id') userId: string, @Req() req: RequestWithUser, @Res() res: Response, @Next() next: NextFunction) {
+    await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+    const user = req.user;
+    if (!user) {
+      res.status(401).send({ message: 'Unauthorized' });
+    } else {
+      const user = await this.usersService.getUserById(userId);
+      res.send({ user });
+    }
   }
 
   @Post()

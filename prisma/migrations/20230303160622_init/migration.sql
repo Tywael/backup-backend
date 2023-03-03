@@ -32,7 +32,7 @@ CREATE TABLE "User" (
     "lastName" TEXT,
     "avatar" TEXT,
     "about" TEXT,
-    "experience" BIGINT NOT NULL DEFAULT 0,
+    "experience" INTEGER NOT NULL DEFAULT 0,
     "status" "UserStatus" NOT NULL DEFAULT 'OFFLINE',
     "role" "UserRole" NOT NULL DEFAULT 'USER',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

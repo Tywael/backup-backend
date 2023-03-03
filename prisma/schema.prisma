@@ -23,7 +23,7 @@ model User {
   lastName   String?
   avatar     String?
   about      String?
-  experience BigInt     @default(0)
+  experience Int        @default(0)
   status     UserStatus @default(OFFLINE)
   role       UserRole   @default(USER)
   createdAt  DateTime   @default(now())
