@@ -1,19 +1,31 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Patch, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt.guard';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Req, Res, Next } from '@nestjs/common';
 import { GamesService } from './games.service';
 import { Game } from '@prisma/client';
+import { AuthMiddleware } from 'src/users/users.middleware';
+import { NextFunction, Response } from 'express';
+import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
 
 @Controller('games')
 export class GamesController {
-  constructor(private gamesService: GamesService) {}
+  constructor(
+    private gamesService: GamesService,
+    private authMiddleware: AuthMiddleware,
+    ) {}
 
-  @UseGuards(JwtAuthGuard)
+    //TODO: get all games by status
+
   @Get()
-  async getAllGames(): Promise<Game[]> {
-    return await this.gamesService.getAllGames();
+  async getAllGames(@Req() req: RequestWithUser, @Res() res: Response) {
+    await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+    const user = req.user;
+    if (!user) {
+      res.status(401).send({ message: 'Unauthorized' });
+    } else {
+      const games =  await this.gamesService.getAllGames();
+      res.send({ games });
+    }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':gameid')
   async getUserById(@Param('gameid', ParseUUIDPipe) gameId: string): Promise<Game> {
     return await this.gamesService.getGameById(gameId);
