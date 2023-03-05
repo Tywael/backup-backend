@@ -21,7 +21,6 @@ export class AuthMiddleware implements NestMiddleware {
       const decodedToken = this.authService.verifyToken(token.access_token);
       const user = await this.userService.findUserById(decodedToken.sub);
       if (user) {
-        user.status = UserStatus.ONLINE;
         req.user = user;
       }
       next();
@@ -29,5 +28,4 @@ export class AuthMiddleware implements NestMiddleware {
       return res.status(401).send({ message: 'Unauthorized, invalid token.'	 });
     }
   }
-
 }
