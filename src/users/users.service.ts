@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { User, UserStatus } from '@prisma/client';
 
@@ -13,10 +13,6 @@ export class UsersService {
         email,
       },
     });
-
-    if (user) {
-      user.experience = user.experience as unknown as bigint;
-    }
 
     if (!user) {
       user = await this.prisma.user.create({
@@ -43,6 +39,20 @@ export class UsersService {
     return user;
   }
 
+  async findUserById(id: string): Promise<any> {
+    const findUser = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!findUser) {
+      throw new BadRequestException('User not found.');
+    }
+
+    return findUser;
+  }
+
   async updateUserStatus(userId: string, status: UserStatus): Promise<User> {
     const user = await this.prisma.user.update({
       where: { id: userId },
@@ -56,12 +66,26 @@ export class UsersService {
   }
 
   async getAllUsers(): Promise<User[]> {
-    return await this.prisma.user.findMany();
+    const findUsers = await this.prisma.user.findMany();
+
+    if (!findUsers) {
+      throw new BadRequestException('No users found.');
+    }
+
+    return findUsers;
   }
 
   async getUserById(userId: string): Promise<User> {
-    return await this.prisma.user.findUnique({ where: { id: userId } });
+    return await this.prisma.user.findFirst({ 
+      where: { 
+        OR: [
+          {id: userId},
+          {pseudo: userId}
+        ]
+      } 
+    });
   }
+
 
   async updateUser(userId: string, data: User): Promise<User> {
     return await this.prisma.user.update({ where: { id: userId }, data });

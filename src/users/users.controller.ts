@@ -1,22 +1,52 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Patch, UseGuards, Req, Res, Next } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
+import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
+import { AuthMiddleware } from './users.middleware';
+import { NextFunction, Response } from 'express';
 
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService, 
+    private authMiddleware: AuthMiddleware,
+  ) {}
 
-  @UseGuards(JwtAuthGuard)
   @Get()
-  async getAllUsers(): Promise<User[]> {
-    return await this.usersService.getAllUsers();
+  async getAllUsers(@Req() req: RequestWithUser, @Res() res: Response, @Next() next: NextFunction) {
+    await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+    const user = req.user;
+    if (!user) {
+      res.status(401).send({ message: 'Unauthorized' });
+    } else {
+      const users = await this.usersService.getAllUsers();
+      res.send({ users });
+    }
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Get('login')
+  async loginUser(@Req() req: RequestWithUser, @Res() res: Response, @Next() next: NextFunction){
+    await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+    const user = req.user;
+    if (!user) {
+      res.status(401).send({ message: 'Unauthorized' });
+    } else {
+      res.send({ user });
+    }
+  }
+
+
   @Get(':id')
-  async getUserById(@Param('id', ParseUUIDPipe) userId: string): Promise<User> {
-    return await this.usersService.getUserById(userId);
+  async getUserById(@Param('id') userId: string, @Req() req: RequestWithUser, @Res() res: Response, @Next() next: NextFunction) {
+    await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+    const user = req.user;
+    if (!user) {
+      res.status(401).send({ message: 'Unauthorized' });
+    } else {
+      const user = await this.usersService.getUserById(userId);
+      res.send({ user });
+    }
   }
 
   @Post()

@@ -52,19 +52,26 @@ export class AuthController {
         this.usersService.updateUserStatus(user.id, UserStatus.ONLINE);
       }
 
-      const token = this.authService.createToken(user);
+      if (!req.cookies[process.env.JWT_NAME]) {
+        const token = this.authService.createToken(user);
 
-      // Check token
-      if (!token) {
-        throw new ForbiddenException('Forbidden, token is missing.');
+        // Check token
+        if (!token) {
+          throw new ForbiddenException('Forbidden, token is missing.');
+        }
+
+        console.log('JWT cookie:', token);
+        
+        // Set jwt cookie
+        res.cookie(process.env.JWT_NAME, token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'none',
+          maxAge: 86400000, // 1 day
+        });
       }
-
-      res.cookie(process.env.JWT_NAME, token, { httpOnly: true });
-      return res.status(200).send({
-        msg: "OAuth success!",
-        data: user,
-        token
-      });
+      const redirectUrl = `${process.env.WEB_URL}/login`
+      res.status(302).redirect(redirectUrl);
     } catch (error) {
       console.error(error);
       res.status(500).send('Error authenticating with 42 API');
