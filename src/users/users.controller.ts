@@ -46,6 +46,17 @@ export class UsersController {
     }
   }
 
+  @Get(':status/:limit')
+  async getUserByStatus(@Param('status') status: string, @Param('limit') limit: string, @Req() req: RequestWithUser, @Res() res: Response, @Next() next: NextFunction) {
+    await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+    if (!req.user) {
+      res.status(401).send({ message: 'Unauthorized' });
+    } else {
+      let users = await this.usersService.getUsersByStatus(status, limit, req.user.id);
+      res.send({ users });
+    }
+  }
+
   @Post()
   async createUser(@Body() data: User): Promise<User> {
     return await this.usersService.createUser(data);
