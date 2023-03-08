@@ -7,8 +7,12 @@ export class ChatsService {
     remove: any;
     constructor(private prisma: PrismaService) {}
 
-    async getAllChats(): Promise<Chat[]> {
-        return await this.prisma.chat.findMany();       
+    async getAllChats(): Promise<Chat[] | null> {
+        const chat = await this.prisma.chat.findMany().catch((err) => {
+            console.log(err);
+            return null;
+        });
+        return chat;       
     }
 
     async getChatById(chatId: string): Promise<Chat> {
@@ -28,7 +32,7 @@ export class ChatsService {
             await this.prisma.userChat.create({ 
                 data: {
                     userId: userId,
-                    chatId: ChatsService.bind,
+                    chatId: chat.id,
                 }
             }).catch((err) => {
                 console.log(err);
