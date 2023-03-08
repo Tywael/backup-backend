@@ -17,14 +17,12 @@ export class ChatsController {
     async getAllChats(@Req() req: RequestWithUser, @Res() res: Response) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
-
-        res.send({ await this.chatsService.getAllChats(); });
-        // if (!user) {
-        //     res.status(401).send({ message: 'unauthorized' });
-        // } else {
-        //     const chats = await this.chatsService.getAllChats();
-        //     res.send({ chats });
-        // }
+        if (!user) {
+            res.status(401).send({ message: 'unauthorized' });
+        } else {
+            const chats = await this.chatsService.getAllChats();
+            res.send({ chats });
+        }
     }
 
     @Get(':chatid')
