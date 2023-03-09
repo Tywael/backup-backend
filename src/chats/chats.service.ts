@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { Chat, UserStatus } from '@prisma/client';
+import { Chat, ChatType, UserStatus } from '@prisma/client';
+import { identity } from 'rxjs';
 
 @Injectable()
 export class ChatsService {
@@ -8,7 +9,11 @@ export class ChatsService {
     constructor(private prisma: PrismaService) {}
 
     async getAllChats(): Promise<Chat[] | null> {
-        const chat = await this.prisma.chat.findMany().catch((err) => {
+        const chat = await this.prisma.chat.findMany({
+            where: {
+                type: ChatType.DIRECT
+            },
+        }).catch((err) => {
             console.log(err);
             return null;
         });
@@ -19,7 +24,11 @@ export class ChatsService {
         return await this.prisma.chat.findUnique({ where: { id: chatId } });        
     }
 
-    async createChat({ userId }: { userId: string }): Promise<Chat | null> {
+    async createChat({ user1Id, user2Id }: { user1Id: string, user2Id: string }): Promise<Chat | null> {
+        if (!user1Id || !user2Id) {
+            console.log("error: userIds incorect");
+            return null;
+        }
         let chat = await this.prisma.chat.create({
             data: {
 
@@ -31,7 +40,18 @@ export class ChatsService {
 
             await this.prisma.userChat.create({ 
                 data: {
-                    userId: userId,
+                    userId: user1Id,
+                    chatId: chat.id,
+                }
+            }).catch((err) => {
+                console.log(err);
+                this.deleteChat(chat.Id);
+                return null;
+            });
+
+            await this.prisma.userChat.create({ 
+                data: {
+                    userId: user2Id,
                     chatId: chat.id,
                 }
             }).catch((err) => {
