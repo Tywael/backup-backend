@@ -7,29 +7,32 @@ export class GamesService {
   remove: any;
   constructor(private prisma: PrismaService) {}
 
-  async create({ userId }: { userId: string }): Promise<Game | null> {
+  async create( userId: string): Promise<Game | null> {
     let game = await this.prisma.game.create({
 	  data: {
 		status: GameStatus.WAITING,
 	  },
-	}).catch((err) => {
+	})
+	.then((game) => {
+		this.prisma.userGame.create({
+			data: {
+				userId,
+				gameId: game.id,
+			},
+		}).catch((err) => {
+			console.log(err);
+			// should throw new BadRequestException('User not found.'); instead
+			this.deleteGame(game.id);
+			return null;
+		});
+		
+	}) 
+	.catch((err) => {
 	  console.log(err);
 	  // should throw new BadRequestException('User not found.'); instead
 	  return null;
 	});
-	
-	await this.prisma.userGame.create({
-		data: {
-			userId: userId,
-			gameId: game.id,
-		},
-	}).catch((err) => {
-		console.log(err);
-		// should throw new BadRequestException('User not found.'); instead
-		this.deleteGame(game.id);
-		return null;
-	});
-	
+	console.log(game)
     return game;
 }
 

@@ -31,9 +31,28 @@ export class GamesController {
     return await this.gamesService.getGameById(gameId);
   }
 
-  @Post(':userid')
-  async createGame(@Body() data: { userId: string }): Promise<Game> {
-	return await this.gamesService.create({ userId: data.userId });
+  @Post('/create')
+  async createGame(@Req() req: RequestWithUser, @Res() res: Response) {
+    await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+    const user = req.user;
+    if (!user) {
+      res.status(401).send({ message: 'Unauthorized' });
+    } else {
+      const games =  await this.gamesService.create(user.id); // TODO: Create the game and set 1st player FK + game as Waiting
+      res.send({ games });
+    }
+  }
+
+  @Post(':gameid/join')
+  async joinGame(@Req() req: RequestWithUser, @Res() res: Response, @Param('gameid', ParseUUIDPipe) gameId: string) {
+    await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+    const user = req.user;
+    if (!user) {
+      res.status(401).send({ message: 'Unauthorized' });
+    } else {
+      const games =  await this.gamesService.updateGameStatus(gameId); // TODO: Update player1 et player2 FK + Game as Playing
+      res.send({ games });
+    }
   }
 
   @Delete(':gameid')
