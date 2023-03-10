@@ -25,6 +25,7 @@ export class AuthMiddleware implements NestMiddleware {
       }
       next();
     } catch (error) {
+      res.clearCookie(process.env.JWT_NAME);
       return res.status(401).send({ message: 'Unauthorized, invalid token.'	 });
     }
   }
