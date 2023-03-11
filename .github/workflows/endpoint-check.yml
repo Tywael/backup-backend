@@ -34,6 +34,7 @@ jobs:
         FORTY_TWO_CLIENT_SECRET: ${{ secrets.FORTY_TWO_CLIENT_SECRET }}
         ENVIRONMENT: ${{ env.ENVIRONMENT }}
       
+      - uses: actions/checkout@v3
       - name: Install Postman CLI
         run: |
           curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
