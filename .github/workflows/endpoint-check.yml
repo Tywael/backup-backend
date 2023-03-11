@@ -1,0 +1,18 @@
+---
+name: Postman-endpoint
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: action/checkout@v2
+    - name: set up app
+      uses: 4-04-squad/ft_transcendence
+
+    - name: building app with make
+      run:  cd ./project
+      run:  make build
