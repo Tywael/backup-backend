@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: action/checkout@v2
+    - uses: actions/checkout@v2
     - name: cloning app
       run:  |
         git clone https://github.com/4-04-squad/ft_transcendence.git
