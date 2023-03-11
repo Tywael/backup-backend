@@ -15,7 +15,7 @@ jobs:
         cd ./ft_transcendence/project
         sudo apt install -y make
 
-     uses: SpicyPizza/create-envfile@v1.3
+    - uses: SpicyPizza/create-envfile@v1.3
       with:
         DOMAINE: ${{ env.DOMAINE }}
         TITLE: ${{ env.TITLE }}
