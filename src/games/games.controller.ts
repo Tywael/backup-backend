@@ -12,7 +12,6 @@ export class GamesController {
     private authMiddleware: AuthMiddleware,
     ) {}
 
-    //TODO: get all games by status
 
   @Get()
   async getAllGames(@Req() req: RequestWithUser, @Res() res: Response) {
@@ -26,9 +25,16 @@ export class GamesController {
     }
   }
 
-  @Get(':gameid')
-  async getUserById(@Param('gameid', ParseUUIDPipe) gameId: string): Promise<Game> {
-    return await this.gamesService.getGameById(gameId);
+  @Get(':status')
+  async getGameByStatus(@Req() req: RequestWithUser, @Res() res: Response, @Param('status') status: string) {
+    await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+    const user = req.user;
+    if (!user) {
+      res.status(401).send({ message: 'Unauthorized' });
+    } else {
+      const games =  await this.gamesService.getGameByStatus(status);
+      res.send({ games });
+    }
   }
 
   @Post('/create')
@@ -43,17 +49,18 @@ export class GamesController {
     }
   }
 
-  /*@Post(':gameid/join')
+  @Post(':gameid/join')
   async joinGame(@Req() req: RequestWithUser, @Res() res: Response, @Param('gameid', ParseUUIDPipe) gameId: string) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+   // TODO: should check if game is waiting and if user is not already in game
     const user = req.user;
     if (!user) {
       res.status(401).send({ message: 'Unauthorized' });
     } else {
-      const games =  await this.gamesService.updateGameStatus(gameId); // TODO: Update player1 et player2 FK + Game as Playing
+      const games =  await this.gamesService.joinGame(gameId, user.id);
       res.send({ games });
     }
-  }*/
+  }
 
   @Delete(':gameid')
   remove(@Param('gameid', ParseUUIDPipe) gameId: string): Promise<Game> {
