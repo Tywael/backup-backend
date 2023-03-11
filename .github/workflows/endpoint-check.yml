@@ -16,4 +16,6 @@ jobs:
         cd ./ft_transcendence/project
         sudo apt install -y make
     - name: building app with make
-      run:  make build
+      run:  |
+        ls
+        make build
