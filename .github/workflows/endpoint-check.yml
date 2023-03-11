@@ -14,5 +14,6 @@ jobs:
       run:  |
         git clone https://github.com/4-04-squad/ft_transcendence.git
         cd ./ft_transcendence/project
+        apt install make
     - name: building app with make
       run:  make build
