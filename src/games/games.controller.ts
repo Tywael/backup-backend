@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Req, Res, Next } from '@nestjs/common';
 import { GamesService } from './games.service';
-import { Game } from '@prisma/client';
+import { Game, User } from '@prisma/client';
 import { AuthMiddleware } from 'src/users/users.middleware';
 import { NextFunction, Response } from 'express';
 import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
@@ -25,7 +25,19 @@ export class GamesController {
     }
   }
 
-  @Get(':status')
+  @Get('/user')
+  async getGamesByUser(@Req() req: RequestWithUser, @Res() res: Response) {
+    await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+    const user = req.user;
+    if (!user) {
+      res.status(401).send({ message: 'Unauthorized' });
+    } else {
+      const games =  await this.gamesService.getGameByUserId(user.id);
+      res.send({ games });
+    }
+  }
+
+  @Get(':status/status')
   async getGameByStatus(@Req() req: RequestWithUser, @Res() res: Response, @Param('status') status: string) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     const user = req.user;
@@ -37,6 +49,18 @@ export class GamesController {
     }
   }
 
+  @Get(':gameId')
+  async getGameById(@Req() req: RequestWithUser, @Res() res: Response, @Param('gameId') gameId: string) {
+    await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+    const user = req.user;
+    if (!user) {
+      res.status(401).send({ message: 'Unauthorized' });
+    } else {
+      const games =  await this.gamesService.getGameById(gameId);
+      res.send({ games });
+    }
+  } 
+
   @Post('/create')
   async createGame(@Req() req: RequestWithUser, @Res() res: Response) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
@@ -44,7 +68,7 @@ export class GamesController {
     if (!user) {
       res.status(401).send({ message: 'Unauthorized' });
     } else {
-      const games =  await this.gamesService.create(user.id); // TODO: Create the game and set 1st player FK + game as Waiting
+      const games =  await this.gamesService.create(user.id);
       res.send({ games });
     }
   }
@@ -52,7 +76,6 @@ export class GamesController {
   @Post('join')
   async joinGame(@Req() req: RequestWithUser, @Body() data: {gameId: string},  @Res() res: Response) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
-   // TODO: should check if game is waiting and if user is not already in game
     const user = req.user;
     if (!user) {
       res.status(401).send({ message: 'Unauthorized' });
@@ -62,8 +85,15 @@ export class GamesController {
     }
   }
 
-  @Delete(':gameid')
-  remove(@Param('gameid', ParseUUIDPipe) gameId: string): Promise<Game> {
-    return this.gamesService.deleteGame(gameId);
+  @Delete(':gameId/delete')
+  async deleteGame(@Req() req: RequestWithUser, @Res() res: Response, @Param('gameId') gameId: string) {
+    await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+    const user = req.user;
+    if (!user) {
+      res.status(401).send({ message: 'Unauthorized' });
+    } else {
+      const games =  await this.gamesService.deleteGame(gameId, user.id);
+      res.send({ games });
+    }
   }
 }
