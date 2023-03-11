@@ -15,7 +15,5 @@ jobs:
         git clone https://github.com/4-04-squad/ft_transcendence.git
         cd ./ft_transcendence/project
         sudo apt install -y make
-    - name: building app with make
-      run:  |
-        ls
         make build
+        ping localhost
