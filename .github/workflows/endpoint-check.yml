@@ -6,6 +6,7 @@ on:
 
 jobs:
   build:
+    environment: 404squad
     runs-on: ubuntu-latest
 
     steps:
@@ -15,5 +16,23 @@ jobs:
         git clone https://github.com/4-04-squad/ft_transcendence.git
         cd ./ft_transcendence/project
         sudo apt install -y make
-        make build
-        ping localhost
+
+     uses: SpicyPizza/create-envfile@v1.3
+      with:
+        DOMAINE: ${{ env.DOMAINE }}
+        TITLE: ${{ env.TITLE }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRERS_PASSWORD }}
+        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        API_HOST: ${{ env.API_HOST }}
+        API_PORT: ${{ env.API_PORT }}
+        API_URL: ${{ env.API_URL }}
+        WEB_HOST: ${{ env.WEB_HOST }}
+        WEB_PORT: ${{ env.WEB_PORT }}
+        WEB_URL: ${{ env.WEB_URL }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        JWT_NAME: ${{ secrets.JWT_NAME }}
+        FORTY_TWO_CLIENT_ID: ${{ secrets.FORTY_TWO_CLIENT_ID }}
+        FORTY_TWO_CLIENT_SECRET: ${{ secrets.FORTY_TWO_CLIENT_SECRET }}
+        ENVIRONMENT: ${{ env.ENVIRONMENT }}
