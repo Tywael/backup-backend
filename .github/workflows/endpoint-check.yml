@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: cloning app
       run:  |
         git clone https://github.com/4-04-squad/ft_transcendence.git
@@ -34,3 +34,12 @@ jobs:
         FORTY_TWO_CLIENT_ID: ${{ secrets.FORTY_TWO_CLIENT_ID }}
         FORTY_TWO_CLIENT_SECRET: ${{ secrets.FORTY_TWO_CLIENT_SECRET }}
         ENVIRONMENT: ${{ env.ENVIRONMENT }}
+      
+      - name: Install Postman CLI
+        run: |
+          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+      - name: Login to Postman CLI
+        run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
+      - name: Run API tests
+        run: |
+          postman collection run "26253465-2e36fc2b-2d58-45bf-9bd8-57268830bf3c" --integration-id "135708-${{ github.run_id }}"
