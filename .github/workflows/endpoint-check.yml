@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: action/checkout@v2
     - name: cloning app
-    - run:  |
+      run:  |
         git clone https://github.com/4-04-squad/ft_transcendence.git
         cd ./ft_transcendence/project
     - name: building app with make
