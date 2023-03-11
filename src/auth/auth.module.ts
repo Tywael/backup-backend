@@ -4,7 +4,6 @@ import { JwtService, JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma.service'
 import { AuthController } from './auth.controller';
-import { FortyTwoStrategy } from './forty-two.strategy';
 import { UsersService } from 'src/users/users.service';
 
 @Module({
@@ -18,7 +17,6 @@ import { UsersService } from 'src/users/users.service';
   providers: [
     AuthService,
     UsersService,
-    FortyTwoStrategy,
     PrismaService,
     JwtService,
   ],

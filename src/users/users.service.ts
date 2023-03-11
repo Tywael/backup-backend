@@ -75,6 +75,18 @@ export class UsersService {
     return findUsers;
   }
 
+  async getUsersByStatus(status: string, limit: string, currentUserId: string): Promise<User[]> {
+    const statusEnum = UserStatus[status];
+    const findUsers = await this.prisma.user.findMany({
+      where: {
+        status: statusEnum,
+        id : { not: currentUserId }
+      },
+      take: limit ? parseInt(limit) : undefined,
+    });
+    return findUsers;
+  }
+
   async getUserById(userId: string): Promise<User> {
     return await this.prisma.user.findFirst({ 
       where: { 
@@ -85,7 +97,6 @@ export class UsersService {
       } 
     });
   }
-
 
   async updateUser(userId: string, data: User): Promise<User> {
     return await this.prisma.user.update({ where: { id: userId }, data });
