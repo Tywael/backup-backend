@@ -33,6 +33,8 @@ jobs:
         FORTY_TWO_CLIENT_ID: ${{ secrets.FORTY_TWO_CLIENT_ID }}
         FORTY_TWO_CLIENT_SECRET: ${{ secrets.FORTY_TWO_CLIENT_SECRET }}
         ENVIRONMENT: ${{ env.ENVIRONMENT }}
+    - name: launch app
+      run: make build
     - uses: actions/checkout@v3
     - name: Install Postman CLI
       run: |
