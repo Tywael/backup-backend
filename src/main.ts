@@ -6,6 +6,10 @@ import * as dotenv from 'dotenv';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Set the base path for the app
+  app.setGlobalPrefix('api');
+
   app.use(cookieParser());
 
   // Swagger

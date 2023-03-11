@@ -47,7 +47,6 @@ export class AuthController {
       });
 
       if (user) {
-        user.experience = user.experience.toString();
         // Set user as ONLINE
         this.usersService.updateUserStatus(user.id, UserStatus.ONLINE);
       }
@@ -79,8 +78,9 @@ export class AuthController {
   }
 
   @Get('signout/:id')
-  async logout(@Req() req, @Res() res, @Param() params: { id: string }) {
+  async logout(@Req() req, @Res({ passthrough: true }) res, @Param() params: { id: string }) {
     // Set user as OFFLINE
+    res.clearCookie(process.env.JWT_NAME);
     this.usersService.updateUserStatus(params.id, UserStatus.OFFLINE);
     return this.authService.logout(req, res, params.id);
   }
