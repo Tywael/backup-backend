@@ -39,6 +39,11 @@ jobs:
       run: |
         cd ./ft_transcendence/project
         make build
+    - name: test localhost
+      run: |
+        curl localhost
+        curl localhost:3001
+        curl localhost:3001/users
     - uses: actions/checkout@v3
     - name: Install Postman CLI
       run: |
