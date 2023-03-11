@@ -43,7 +43,7 @@ export class GamesController {
     }
   }
 
-  @Post(':gameid/join')
+  /*@Post(':gameid/join')
   async joinGame(@Req() req: RequestWithUser, @Res() res: Response, @Param('gameid', ParseUUIDPipe) gameId: string) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     const user = req.user;
@@ -53,7 +53,7 @@ export class GamesController {
       const games =  await this.gamesService.updateGameStatus(gameId); // TODO: Update player1 et player2 FK + Game as Playing
       res.send({ games });
     }
-  }
+  }*/
 
   @Delete(':gameid')
   remove(@Param('gameid', ParseUUIDPipe) gameId: string): Promise<Game> {
