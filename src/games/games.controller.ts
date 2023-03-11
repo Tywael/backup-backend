@@ -49,15 +49,15 @@ export class GamesController {
     }
   }
 
-  @Post(':gameid/join')
-  async joinGame(@Req() req: RequestWithUser, @Res() res: Response, @Param('gameid', ParseUUIDPipe) gameId: string) {
+  @Post('join')
+  async joinGame(@Req() req: RequestWithUser, @Body() data: {gameId: string},  @Res() res: Response) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
    // TODO: should check if game is waiting and if user is not already in game
     const user = req.user;
     if (!user) {
       res.status(401).send({ message: 'Unauthorized' });
     } else {
-      const games =  await this.gamesService.joinGame(gameId, user.id);
+      const games =  await this.gamesService.joinGame(data.gameId, user.id);
       res.send({ games });
     }
   }
