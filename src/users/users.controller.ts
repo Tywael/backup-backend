@@ -5,8 +5,12 @@ import { User } from '@prisma/client';
 import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
 import { AuthMiddleware } from './users.middleware';
 import { NextFunction, Response } from 'express';
+import { ApiTags, ApiBody, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
+import { UserDto } from './dto/user.dto';
 
 @Controller('users')
+@ApiTags('Users')
+@ApiResponse({ status: 401, description: 'Unauthorized'})
 export class UsersController {
   constructor(
     private usersService: UsersService,
@@ -25,6 +29,7 @@ export class UsersController {
   }
 
   @Get('login')
+  @ApiOkResponse({ type: UserDto })
   async loginUser(@Req() req: RequestWithUser, @Res() res: Response, @Next() next: NextFunction) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     const user = req.user;
@@ -36,6 +41,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @ApiOkResponse({ type: UserDto })
   async getUserById(@Param('id') userId: string, @Req() req: RequestWithUser, @Res() res: Response, @Next() next: NextFunction) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     if (!req.user) {
@@ -47,6 +53,7 @@ export class UsersController {
   }
 
   @Get(':status/:limit')
+  @ApiOkResponse({ type: UserDto })
   async getUserByStatus(@Param('status') status: string, @Param('limit') limit: string, @Req() req: RequestWithUser, @Res() res: Response, @Next() next: NextFunction) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     if (!req.user) {
@@ -58,14 +65,14 @@ export class UsersController {
   }
 
   @Post()
-  async createUser(@Body() data: User): Promise<User> {
+  async createUser(@Body() data: UserDto): Promise<User> {
     return await this.usersService.createUser(data);
   }
 
   @Patch(':id/edit')
   async updateUser(
     @Param('id', ParseUUIDPipe) userId: string,
-    @Body() data: User,
+    @Body() data: UserDto,
     @Req() req: RequestWithUser, @Res() res: Response, @Next() next: NextFunction
   ) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));

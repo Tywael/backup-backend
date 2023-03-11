@@ -7,8 +7,10 @@ import { UsersService } from '../users/users.service';
 import { PrismaService } from '../prisma.service';
 import axios from 'axios';
 import { UserStatus } from '@prisma/client';
+import { ApiTags, ApiResponse, ApiProperty } from '@nestjs/swagger';
 
 @Controller('auth')
+@ApiTags('Auth')
 export class AuthController {
   constructor(private authService: AuthService, private prisma: PrismaService, private usersService: UsersService) {}
 
@@ -17,6 +19,7 @@ export class AuthController {
   async loginWithFortyTwo(@Res() res: Response) {}
 
   @Get('login/callback')
+  @ApiResponse({ status: 500, description: 'Error authenticating with 42 API'})
   async loginWithFortyTwoCallback(@Req() req: RequestWithUser, @Res() res: Response) {
     const { code } = req.query;
   
