@@ -24,8 +24,19 @@ export class ChatsService {
         return await this.prisma.chat.findUnique({ where: { id: chatId } });        
     }
 
+    async getChatByUser(userTofindId: string): Promise<Chat[] | null> {
+        let chatUser = await this.prisma.userChat.findMany({
+            where: {
+                userId: userTofindId
+            }
+        })
+        const chats = await this.prisma.chat.findMany({ where: { id: { in: chatUser.map((userChat) => userChat.chatId) } } })
+
+        return chats
+    }
+
     async createChat({ user1Id, user2Id }: { user1Id: string, user2Id: string }): Promise<Chat | null> {
-        if (!user1Id || !user2Id) {
+        if (!user1Id || !user2Id || (user1Id == user2Id)) {
             console.log("error: userIds incorect");
             return null;
         }

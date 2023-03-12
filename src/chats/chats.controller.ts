@@ -25,19 +25,31 @@ export class ChatsController {
         }
     }
 
-    @Get(':chatid')
-    async getChatsById(@Param('chatid', ParseUUIDPipe) chatId: string): Promise<Chat> {
-        return await this.chatsService.getChatById(chatId);
-    }
-
-    @Post()
-    async createChat(@Body() data: User, @Req() req: RequestWithUser, @Res() res: Response) {
+    @Get('myChats')
+    async getMyAllChats(@Req() req: RequestWithUser, @Res() res: Response) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
         if (!user) {
             res.status(401).send({ message: 'unauthorized' });
         } else {
-            const chat = await this.chatsService.createChat({ user1Id: user.userId, user2Id: data.id });
+            const chats = await this.chatsService.getChatByUser(user.id);
+            res.send({ chats });
+        }
+    }
+
+    @Get(':chatid')
+    async getChatsById(@Param('chatid', ParseUUIDPipe) chatId: string): Promise<Chat> {
+        return await this.chatsService.getChatById(chatId);
+    }
+
+    @Post('create')
+    async createChat(@Body() data: { userid: string }, @Req() req: RequestWithUser, @Res() res: Response) {
+        await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+        const user = req.user;
+        if (!user) {
+            res.status(401).send({ message: 'unauthorized' });
+        } else {
+            const chat = await this.chatsService.createChat({ user1Id: user.id, user2Id: data.userid });
             res.send({ chat });
         }
     }
