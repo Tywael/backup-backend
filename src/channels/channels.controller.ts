@@ -54,6 +54,18 @@ export class ChannelsController {
         }
     }
 
+    @Post('join')
+    async joinChannel(@Body() data: { chatid: string }, @Req() req: RequestWithUser, @Res() res: Response) {
+        await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+        const user = req.user;
+        if (!user) {
+            res.status(401).send({ message: 'unauthorized' });
+        } else {
+            const channel = await this.channelsService.joinChannel(data.chatid, user.id);
+            res.send({ channel });
+        }
+    }
+
     @Patch(':id')
     async updateChat(
         @Param('id', ParseUUIDPipe) channelId: string,

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { Chat, ChatType, UserChatStatus, UserStatus } from '@prisma/client';
 import { identity } from 'rxjs';
@@ -66,6 +66,26 @@ export class ChannelsService {
                 return null;
             });
         return channel;      
+    }
+
+    async joinChannel(chatId: string, userId: string): Promise<Chat | void> {
+        const channel = await this.prisma.chat.findUnique({ where: { id: chatId } });
+        const userChannel = await this.prisma.userChat.findMany({ where: { chatId: chatId, userId: userId } });
+        
+        if (userChannel.length > 0)
+            throw new BadRequestException("User are Already in the channel");
+        
+        if (channel.type != ChatType.PUBLIC)
+            throw new BadRequestException("User can't join this channel");
+        
+        await this.prisma.userChat.create({
+            data: {
+                userId: userId,
+                chatId: chatId,
+                status: UserChatStatus.MEMBER,
+            }
+        })
+        return channel;
     }
 
     async updateChannel(chatId: string, data: Chat): Promise<Chat> {
