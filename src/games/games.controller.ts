@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Req, Res, Next } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req, Res, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GamesService } from './games.service';
-import { Game, User } from '@prisma/client';
+import { JoinGameDto } from './dto/joinGame.dto';
 import { AuthMiddleware } from 'src/users/users.middleware';
-import { NextFunction, Response } from 'express';
+import { Response } from 'express';
 import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
 
 @Controller('games')
@@ -74,7 +74,8 @@ export class GamesController {
   }
 
   @Post('join')
-  async joinGame(@Req() req: RequestWithUser, @Body() data: {gameId: string},  @Res() res: Response) {
+  @UsePipes(ValidationPipe)
+  async joinGame(@Req() req: RequestWithUser, @Body() data: JoinGameDto,  @Res() res: Response) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     const user = req.user;
     if (!user) {

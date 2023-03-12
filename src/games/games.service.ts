@@ -62,10 +62,10 @@ export class GamesService {
   async joinGame(gameId: string, userId: string): Promise<Game | void> {
     const game = await this.prisma.game.findUnique({ where: { id: gameId } });
 
-    // check if that the user joininh is not already in the game
+    // check if that the user is not already in the game
     const userGame = await this.prisma.userGame.findMany({ where: { gameId: gameId, userId: userId } });
     if (userGame.length > 0)
-      throw new BadRequestException("User already in game");
+      throw new BadRequestException("User already in the game");
 
     if (game.status == GameStatus.FINISHED || game.status == GameStatus.INPROGRESS)
       throw new BadRequestException("Game is already in progress or finished");
