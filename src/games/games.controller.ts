@@ -4,8 +4,12 @@ import { JoinGameDto } from './dto/joinGame.dto';
 import { AuthMiddleware } from 'src/users/users.middleware';
 import { Response } from 'express';
 import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
+import { ApiTags, ApiBody, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
+import { GameDto } from './dto/game.dto';
 
 @Controller('games')
+@ApiTags('Games')
+@ApiResponse({ status: 401, description: 'Unauthorized'})
 export class GamesController {
   constructor(
     private gamesService: GamesService,
@@ -14,6 +18,7 @@ export class GamesController {
 
 
   @Get()
+  @ApiOkResponse({description: 'Returns an Array of games', type: GameDto, isArray: true })
   async getAllGames(@Req() req: RequestWithUser, @Res() res: Response) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     const user = req.user;
@@ -26,7 +31,8 @@ export class GamesController {
   }
 
   @Get('/user')
-  async getGamesByUser(@Req() req: RequestWithUser, @Res() res: Response) {
+  @ApiOkResponse({description: 'Returns a game', type: GameDto })
+  async getGamesByUser(@Param('user') userId: string, @Req() req: RequestWithUser, @Res() res: Response) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     const user = req.user;
     if (!user) {
@@ -38,6 +44,7 @@ export class GamesController {
   }
 
   @Get(':status/status')
+  @ApiOkResponse({description: 'Returns an Array of games matching status', type: GameDto, isArray: true })
   async getGameByStatus(@Req() req: RequestWithUser, @Res() res: Response, @Param('status') status: string) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     const user = req.user;
@@ -50,6 +57,7 @@ export class GamesController {
   }
 
   @Get(':gameId')
+  @ApiOkResponse({description: 'Returns a game matching gameID', type: GameDto })
   async getGameById(@Req() req: RequestWithUser, @Res() res: Response, @Param('gameId') gameId: string) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     const user = req.user;
@@ -62,6 +70,7 @@ export class GamesController {
   } 
 
   @Post('/create')
+  @ApiOkResponse({description: 'Returns a game', type: GameDto })
   async createGame(@Req() req: RequestWithUser, @Res() res: Response) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     const user = req.user;
@@ -75,6 +84,7 @@ export class GamesController {
 
   @Post('join')
   @UsePipes(ValidationPipe)
+  @ApiResponse({ status: 400, description: 'User already in the game'})
   async joinGame(@Req() req: RequestWithUser, @Body() data: JoinGameDto,  @Res() res: Response) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     const user = req.user;
