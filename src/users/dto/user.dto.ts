@@ -19,7 +19,7 @@ export class UserDto {
     @ApiProperty()
     about: string | null
     @ApiProperty()
-    experience: bigint
+    experience: number
     @ApiProperty()
     status: UserStatus
     @ApiProperty()
