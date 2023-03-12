@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { GamesModule } from './games/games.module';
+import { FriendsModule } from './friends/friends.modules';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { GamesModule } from './games/games.module';
     AuthModule,
     UsersModule,
     GamesModule,
+    FriendsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
