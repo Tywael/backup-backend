@@ -30,7 +30,7 @@ export class UsersController {
 
   @Get('login')
   @ApiOkResponse({ type: UserDto })
-  async loginUser(@Req() req: RequestWithUser, @Res() res: Response, @Next() next: NextFunction) {
+  async loginUser(@Param('login') login: string, @Req() req: RequestWithUser, @Res() res: Response, @Next() next: NextFunction) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     const user = req.user;
     if (!user) {
@@ -70,6 +70,7 @@ export class UsersController {
   }
 
   @Patch(':id/edit')
+  @ApiOkResponse({ type: UserDto })
   async updateUser(
     @Param('id', ParseUUIDPipe) userId: string,
     @Body() data: UserDto,
