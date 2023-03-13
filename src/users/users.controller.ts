@@ -30,10 +30,9 @@ export class UsersController {
     }
   }
 
-  @Get('login')
+  @Get('me')
   @ApiOkResponse({ type: UserDto })
   async loginUser(
-    @Param('login') login: string,
     @Req() req: RequestWithUser, 
     @Res() res: Response, 
     @Next() next: NextFunction
@@ -82,7 +81,7 @@ export class UsersController {
     }
   }
 
-  @Post()
+  @Post('/create')
   async createUser(@Body() data: UserDto): Promise<User> {
     return await this.usersService.createUser(data);
   }

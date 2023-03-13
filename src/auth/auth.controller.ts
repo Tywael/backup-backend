@@ -14,10 +14,6 @@ import { ApiTags, ApiResponse, ApiProperty } from '@nestjs/swagger';
 export class AuthController {
   constructor(private authService: AuthService, private prisma: PrismaService, private usersService: UsersService) {}
 
-  @Get('login')
-  @UseGuards(AuthGuard('42'))
-  async loginWithFortyTwo(@Res() res: Response) {}
-
   @Get('login/callback')
   @ApiResponse({ status: 500, description: 'Error authenticating with 42 API'})
   async loginWithFortyTwoCallback(@Req() req: RequestWithUser, @Res() res: Response) {
