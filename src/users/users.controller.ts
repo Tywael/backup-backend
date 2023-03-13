@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Patch, Req, Res, Next } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User } from '@prisma/client';
+import { User, UserStatus } from '@prisma/client';
 import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
 import { AuthMiddleware } from './users.middleware';
 import { NextFunction, Response } from 'express';
@@ -42,6 +42,7 @@ export class UsersController {
     if (!user) {
       res.status(401).send({ message: 'Unauthorized' });
     } else {
+      this.usersService.updateUserStatus(user.id, UserStatus.ONLINE);
       res.send({ user });
     }
   }
