@@ -19,13 +19,11 @@ export class FriendsService {
         }
     
         // Check if already friends
-        const isAlreadyFriends = await this.prisma.user.findFirst({
+        const isAlreadyFriends = await this.prisma.friendship.findUnique({
           where: {
-            id: userId,
-            friends: {
-              some: {
-                id: friendId,
-              },
+            userId_friendId: {
+              userId,
+              friendId,
             },
           },
         });
@@ -45,11 +43,11 @@ export class FriendsService {
         return friendship;
       }
     
-      // User receiving the requests
+      // User sending the requests
       async getFriendRequests(userId: string): Promise<Friendship[]> {
         const friendRequests = await this.prisma.friendship.findMany({
           where: {
-            friendId: userId,
+            userId: userId,
             accepted: false,
           },
           include: {
@@ -59,11 +57,11 @@ export class FriendsService {
         return friendRequests;
       }
     
-      // User sending the requests
+      // User receiving the requests
       async getIncomingFriendRequests(userId: string): Promise<Friendship[]> {
         const incomingFriendRequests = await this.prisma.friendship.findMany({
           where: {
-            userId: userId,
+            friendId: userId,
             accepted: false,
           },
           include: {
@@ -86,13 +84,11 @@ export class FriendsService {
         }
     
         // Check if already friends
-        const isAlreadyFriends = await this.prisma.user.findFirst({
+        const isAlreadyFriends = await this.prisma.friendship.findUnique({
           where: {
-            id: userId,
-            friends: {
-              some: {
-                id: friendId,
-              },
+            userId_friendId: {
+              userId,
+              friendId,
             },
           },
         });
@@ -129,13 +125,11 @@ export class FriendsService {
         }
     
         // Check if already friends
-        const isAlreadyFriends = await this.prisma.user.findFirst({
+        const isAlreadyFriends = await this.prisma.friendship.findUnique({
           where: {
-            id: userId,
-            friends: {
-              some: {
-                id: friendId,
-              },
+            userId_friendId: {
+              userId,
+              friendId,
             },
           },
         });
