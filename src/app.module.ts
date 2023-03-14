@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { ChatsModule } from './chats/chats.module';
+import { GamesModule } from './games/games.module';
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import { ChatsModule } from './chats/chats.module';
     }),
     AuthModule,
     UsersModule,
-    ChatsModule,
+    GamesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
