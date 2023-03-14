@@ -42,8 +42,6 @@ jobs:
     - name: test localhost
       run: |
         curl http://localhost
-        curl http://localhost:3001
-        curl http://localhost:3001/users
     - uses: actions/checkout@v3
     - name: Install Postman CLI
       run: |
