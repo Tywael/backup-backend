@@ -33,25 +33,57 @@ export class ChatsService {
 
     async getChatByUser(userTofindId: string): Promise<Chat[] | null> {
         let chatUser = await this.prisma.userChat.findMany({
-            where: {
-                userId: userTofindId
-            }
+          where: {
+            userId: userTofindId
+          }
         })
         const chats = await this.prisma.chat.findMany({ 
-            where: { 
-                id: { 
-                    in: chatUser.map((userChat) => userChat.chatId) 
-                } 
-            },
-            include: {
-                users: true
-            }
+          where: { 
+            id: { 
+              in: chatUser.map((userChat) => userChat.chatId) 
+            } 
+          },
+          include: {
+            users: true
+          }
         });
-
-        // TODO: Query users details and return it to view
-
-        return chats
-    }
+        
+        // Get all user ids from the chats
+        const userIds = chats.reduce((acc, chat) => {
+          chat.users.forEach(user => {
+            if (!acc.includes(user.userId)) {
+              acc.push(user.userId)
+            }
+          })
+          return acc
+        }, [])
+      
+        // Query users by their ids
+        const users = await this.prisma.user.findMany({
+          where: {
+            id: {
+              in: userIds
+            }
+          }
+        })
+      
+        // Map user details to each chat object
+        const result = chats.map(chat => {
+          const chatUsers = chat.users.map(chatUser => {
+            const user = users.find(u => u.id === chatUser.userId)
+            return {
+              ...chatUser,
+              user
+            }
+          })
+          return {
+            ...chat,
+            users: chatUsers
+          }
+        })
+      
+        return result
+      }      
 
     async createChat({ user1Id, user2Id }: { user1Id: string, user2Id: string }): Promise<Chat | void> {
         if (!user1Id || !user2Id || (user1Id == user2Id)) {
