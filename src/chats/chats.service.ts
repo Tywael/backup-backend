@@ -48,7 +48,8 @@ export class ChatsService {
             }
         });
 
-        // TODO: Query users details and return it to the front
+        // TODO: Query users details and return it to view
+
         return chats
     }
 
