@@ -1,12 +1,15 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { Chat, ChatType, UserStatus } from '@prisma/client';
-import { identity } from 'rxjs';
+import { Chat, ChatType, User } from '@prisma/client';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class ChatsService {
     remove: any;
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private usersService: UsersService
+        ) {}
 
     async getAllChats(): Promise<Chat[] | null> {
         const chat = await this.prisma.chat.findMany({
@@ -21,7 +24,11 @@ export class ChatsService {
     }
 
     async getChatById(chatId: string): Promise<Chat> {
-        return await this.prisma.chat.findUnique({ where: { id: chatId } });        
+        return await this.prisma.chat.findUnique({ 
+            where: { 
+                id: chatId 
+            } 
+        });        
     }
 
     async getChatByUser(userTofindId: string): Promise<Chat[] | null> {
@@ -30,8 +37,18 @@ export class ChatsService {
                 userId: userTofindId
             }
         })
-        const chats = await this.prisma.chat.findMany({ where: { id: { in: chatUser.map((userChat) => userChat.chatId) } } })
+        const chats = await this.prisma.chat.findMany({ 
+            where: { 
+                id: { 
+                    in: chatUser.map((userChat) => userChat.chatId) 
+                } 
+            },
+            include: {
+                users: true
+            }
+        });
 
+        // TODO: Query users details and return it to the front
         return chats
     }
 
