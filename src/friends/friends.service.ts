@@ -71,7 +71,7 @@ export class FriendsService {
         return incomingFriendRequests;
       }  
     
-      async acceptFriendRequest(userId: string, friendId: string): Promise<Friendship> {
+      async acceptFriendRequest(userId: string, friendId: string) {
         // Check if friendId exists
         const friend = await this.prisma.user.findUnique({
           where: {
@@ -98,7 +98,7 @@ export class FriendsService {
         }
     
         // Accept friend request
-        const friendship = await this.prisma.friendship.update({
+        await this.prisma.friendship.update({
           where: {
             userId_friendId: {
               userId,
@@ -109,7 +109,18 @@ export class FriendsService {
             accepted: true,
           },
         });
-        return friendship;
+
+        await this.prisma.friendship.update({
+          where: {
+            userId_friendId: {
+              userId: friendId,
+              friendId: userId,
+            },
+          },
+          data: {
+            accepted: true,
+          },
+        });
       }
 
       async cancelFriendRequest(userId: string, friendId: string) {
