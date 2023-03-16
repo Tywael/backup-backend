@@ -57,7 +57,7 @@ export class FriendsController {
             res.status(401).send({ message: 'Unauthorized' });
         } else {
             let friendRequests = await this.friendsService.getIncomingFriendRequests(req.user.id);
-            res.send({ friendRequests});
+            res.send({ friendRequests });
         }
     }
 
@@ -120,6 +120,27 @@ export class FriendsController {
         }
     }
 
+    @Delete(':id/cancel')
+    @ApiOkResponse({ type: FriendRequestDto })
+    async cancelFriendRequestUser(
+        @Param('id') userId: string,
+        @Req() req: RequestWithUser,
+        @Res({ passthrough: true }) res: Response,
+        @Next() next: NextFunction
+    ) {
+        await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+        if (!req.user) {
+            res.status(401).send({ message: 'Unauthorized' });
+        } else {
+            if (userId !== req.user.id) {
+                await this.friendsService.cancelFriendRequest(req.user.id, userId);
+                res.send({ message: 'Cancel friend request successfully' });
+            } else {
+                res.status(401).send({ message: 'Unauthorize to unfriend yourself' });
+            }
+        }
+    }
+
     @Delete(':id/unfriend')
     @ApiOkResponse({ type: FriendRequestDto })
     async unfriendUser(
@@ -133,8 +154,8 @@ export class FriendsController {
             res.status(401).send({ message: 'Unauthorized' });
         } else {
             if (userId !== req.user.id) {
-                let friendship = await this.friendsService.unfriendUser(req.user.id, userId);
-                res.send({ friendship, message: 'Unfriended successfully' });
+                await this.friendsService.unfriendUser(req.user.id, userId);
+                res.send({ message: 'Unfriended successfully' });
             } else {
                 res.status(401).send({ message: 'Unauthorize to unfriend yourself' });
             }

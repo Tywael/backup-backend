@@ -28,7 +28,7 @@ export class FriendsService {
           },
         });
     
-        if (isAlreadyFriends) {
+        if (isAlreadyFriends && isAlreadyFriends.accepted) {
           throw new BadRequestException('Already friends.');
         }
     
@@ -65,7 +65,7 @@ export class FriendsService {
             accepted: false,
           },
           include: {
-            friend: true,
+            user: true,
           },
         });
         return incomingFriendRequests;
@@ -93,7 +93,7 @@ export class FriendsService {
           },
         });
     
-        if (isAlreadyFriends) {
+        if (isAlreadyFriends && isAlreadyFriends.accepted) {
           throw new BadRequestException('Already friends.');
         }
     
@@ -111,8 +111,42 @@ export class FriendsService {
         });
         return friendship;
       }
+
+      async cancelFriendRequest(userId: string, friendId: string) {
+        // Check if friendId exists
+        const friend = await this.prisma.user.findUnique({
+          where: {
+            id: friendId,
+          },
+        });
     
-      async unfriendUser(userId: string, friendId: string): Promise<Friendship> {
+        if (!friend) {
+          throw new BadRequestException('User not found.');
+        }
+    
+        // Check if already friends
+        const isAlreadyFriends = await this.prisma.friendship.findUnique({
+          where: {
+            userId_friendId: {
+              userId,
+              friendId,
+            },
+          },
+        });
+    
+        if (!isAlreadyFriends) {
+          throw new BadRequestException('Not friends.');
+        }
+    
+        // cancel request
+        await this.prisma.friendship.delete({
+          where: {
+            id: isAlreadyFriends.id
+          },
+        });
+      }
+    
+      async unfriendUser(userId: string, friendId: string) {
         // Check if friendId exists
         const friend = await this.prisma.user.findUnique({
           where: {
@@ -139,7 +173,7 @@ export class FriendsService {
         }
     
         // Unfriend user
-        const friendship = await this.prisma.friendship.delete({
+        await this.prisma.friendship.delete({
           where: {
             userId_friendId: {
               userId,
@@ -147,7 +181,15 @@ export class FriendsService {
             },
           },
         });
-        return friendship;
+
+        await this.prisma.friendship.delete({
+          where: {
+            userId_friendId: {
+              userId: friendId,
+              friendId: userId,
+            },
+          },
+        });
       }
     
       async getFriends(userId: string): Promise<User[]> {
