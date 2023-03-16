@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { ChatsModule } from './chats/chats.module';
+import { ChannelsModule } from './channels/channels.module';
 import { GamesModule } from './games/games.module';
 import { FriendsModule } from './friends/friends.modules';
 
@@ -14,6 +16,8 @@ import { FriendsModule } from './friends/friends.modules';
     }),
     AuthModule,
     UsersModule,
+    ChatsModule,
+    ChannelsModule,
     GamesModule,
     FriendsModule,
   ],
