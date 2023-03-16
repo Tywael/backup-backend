@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { Chat, ChatType, UserStatus } from '@prisma/client';
 import { identity } from 'rxjs';
@@ -56,7 +56,7 @@ export class ChatsService {
                 }
             }).catch((err) => {
                 console.log(err);
-                this.deleteChat(chat.Id);
+                this.deleteChat(chat.Id, user1Id);
                 return null;
             });
 
@@ -67,7 +67,7 @@ export class ChatsService {
                 }
             }).catch((err) => {
                 console.log(err);
-                this.deleteChat(chat.Id);
+                this.deleteChat(chat.Id, user1Id);
                 return null;
             });
         return chat;      
@@ -77,7 +77,32 @@ export class ChatsService {
         return await this.prisma.chat.update({ where: { id: chatId }, data });
     }
 
-    async deleteChat(chatId: string): Promise<Chat> {
-        return await this.prisma.chat.delete({ where: { id: chatId } });        
+    async deleteChat(chatId: string, userId: string): Promise<Chat | null> {
+        const user = await this.prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        }).catch((err) => {
+            throw new BadRequestException(err);
+        });
+
+        if (user.role != "ADMIN") {
+            throw new BadRequestException("User is not an admin");
+        }
+        await this.prisma.userChat.deleteMany({
+            where: {
+                chatId: chatId
+            }
+        }).catch((err) => {
+            throw new BadRequestException(err);
+        });
+        const deleted = this.prisma.chat.delete({
+            where: {
+                id: chatId
+            }
+        }).catch((err) => {
+            throw new BadRequestException(err);
+        });
+        return deleted;
     }
 }

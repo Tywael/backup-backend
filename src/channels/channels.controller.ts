@@ -75,7 +75,14 @@ export class ChannelsController {
     }
 
     @Delete(':channelid')
-    remove(@Param('channelid', ParseUUIDPipe) channelId: string): Promise<Chat> {
-        return this.channelsService.deleteChannel(channelId);        
+    async deleteChannel(@Param('channelid', ParseUUIDPipe) chatId: string, @Req() req: RequestWithUser, @Res() res: Response) {      
+        await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+        const user = req.user;
+        if (!user) {
+          res.status(401).send({ message: 'Unauthorized' });
+        } else {
+          const chats =  await this.channelsService.deletechanel(chatId, user.id);
+          res.send({ chats });
+        }
     }
 }

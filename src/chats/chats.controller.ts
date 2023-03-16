@@ -63,7 +63,14 @@ export class ChatsController {
     }
 
     @Delete(':chatid')
-    remove(@Param('chatid', ParseUUIDPipe) chatId: string): Promise<Chat> {
-        return this.chatsService.deleteChat(chatId);        
+    async deleteChat(@Param('chatid', ParseUUIDPipe) chatId: string, @Req() req: RequestWithUser, @Res() res: Response) {      
+        await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+        const user = req.user;
+        if (!user) {
+          res.status(401).send({ message: 'Unauthorized' });
+        } else {
+          const chats =  await this.chatsService.deleteChat(chatId, user.id);
+          res.send({ chats });
+        }
     }
 }

@@ -62,7 +62,6 @@ export class ChannelsService {
                 }
             }).catch((err) => {
                 console.log(err);
-                this.deleteChannel(channel.Id);
                 return null;
             });
         return channel;      
@@ -92,7 +91,43 @@ export class ChannelsService {
         return await this.prisma.chat.update({ where: { id: chatId }, data });
     }
 
-    async deleteChannel(chatId: string): Promise<Chat> {
-        return await this.prisma.chat.delete({ where: { id: chatId } });        
+    
+    async deletechanel(chatId: string, userId: string): Promise<Chat | null> {
+        const user = await this.prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        }).catch((err) => {
+            throw new BadRequestException(err);
+        });
+
+        if (user.role != "ADMIN") {
+            const userChat = await this.prisma.userChat.findMany({
+                where: {
+                    chatId: chatId,
+                    userId: userId,
+                    status: UserChatStatus.OWNER
+                }
+            });
+            if (userChat.length == 0) {
+                throw new BadRequestException("User is not the owner of the channel");
+            }
+
+            await this.prisma.userChat.deleteMany({
+                where: {
+                    chatId: chatId
+                }
+            }).catch((err) => {
+                throw new BadRequestException(err);
+            });
+            const deleted = this.prisma.chat.delete({
+                where: {
+                    id: chatId
+                }
+            }).catch((err) => {
+                throw new BadRequestException(err);
+            });
+            return deleted;
+        }
     }
 }
