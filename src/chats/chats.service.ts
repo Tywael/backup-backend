@@ -39,6 +39,7 @@ export class ChatsService {
         })
         const chats = await this.prisma.chat.findMany({ 
           where: { 
+            type: ChatType.DIRECT,
             id: { 
               in: chatUser.map((userChat) => userChat.chatId) 
             } 
