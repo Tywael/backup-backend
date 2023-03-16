@@ -35,7 +35,7 @@ export class ChatsService {
         return chats
     }
 
-    async createChat({ user1Id, user2Id }: { user1Id: string, user2Id: string }): Promise<Chat | null> {
+    async createChat({ user1Id, user2Id }: { user1Id: string, user2Id: string }): Promise<Chat | void> {
         if (!user1Id || !user2Id || (user1Id == user2Id)) {
             console.log("error: userIds incorect");
             return null;
@@ -56,7 +56,6 @@ export class ChatsService {
                 }
             }).catch((err) => {
                 console.log(err);
-                this.deleteChat(chat.Id, user1Id);
                 return null;
             });
 
@@ -67,7 +66,6 @@ export class ChatsService {
                 }
             }).catch((err) => {
                 console.log(err);
-                this.deleteChat(chat.Id, user1Id);
                 return null;
             });
         return chat;      
