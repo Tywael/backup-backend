@@ -46,16 +46,16 @@ export class FriendsService {
       // User sending the requests
       async getFriendRequests(userId: string): Promise<Friendship[]> {
         const friendRequests = await this.prisma.friendship.findMany({
-          where: {
-            userId: userId,
-            accepted: false,
-          },
-          include: {
-            user: true,
-          },
+            where: {
+                userId: userId,
+                accepted: false,
+            },
+            include: {
+                friend: true,
+            },
         });
         return friendRequests;
-      }
+    }
     
       // User receiving the requests
       async getIncomingFriendRequests(userId: string): Promise<Friendship[]> {
@@ -162,5 +162,19 @@ export class FriendsService {
         });
         const friends = friendships.map((friendship) => friendship.friend);
         return friends;
+      }
+
+      async getFriendship(userId: string, friendId: string): Promise<Friendship> {
+        const friendship = await this.prisma.friendship.findUnique({
+          where: {
+            userId_friendId: {
+              userId,
+              friendId,
+            },
+          },
+        });
+
+        // return if accepted is true
+        return friendship;
       }
 }

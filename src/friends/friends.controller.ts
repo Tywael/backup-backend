@@ -61,6 +61,23 @@ export class FriendsController {
         }
     }
 
+    // Are we friends?
+    @Get(':id')
+    async getFriendship(
+        @Param('id') userId: string,
+        @Req() req: RequestWithUser,
+        @Res({ passthrough: true }) res: Response,
+        @Next() next: NextFunction
+    ) {
+        await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+        if (!req.user) {
+            res.status(401).send({ message: 'Unauthorized' });
+        } else {
+            let friendship = await this.friendsService.getFriendship(req.user.id, userId);
+            res.send({ friendship });
+        }
+    }
+
     @Post('add')
     @ApiOkResponse({ type: FriendRequestDto })
     async sendFriendRequest(
