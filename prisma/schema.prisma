@@ -34,6 +34,7 @@ model User {
   friends Friendship[]  @relation(name: "receiver")
   blockers   User[]      @relation(name: "blocked")
   blocked  User[]       @relation(name: "blocked")
+  messages      Message[]
 }
 
 model Friendship {
@@ -77,6 +78,8 @@ model Message {
   updatedAt DateTime       @updatedAt
   chat      Chat  @relation(fields: [chatId], references: [id])
   chatId    String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
 }
 
 model UserGame {

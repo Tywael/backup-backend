@@ -30,7 +30,7 @@ export class UsersController {
     }
   }
 
-  @Get('me')
+  @Get('@me')
   @ApiOkResponse({ type: UserDto })
   async loginUser(
     @Req() req: RequestWithUser, 

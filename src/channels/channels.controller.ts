@@ -25,7 +25,7 @@ export class ChannelsController {
         }
     }
 
-    @Get('myChannels')
+    @Get('@me')
     async getMyAllChannels(@Req() req: RequestWithUser, @Res() res: Response) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;

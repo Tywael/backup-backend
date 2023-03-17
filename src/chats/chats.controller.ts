@@ -25,7 +25,7 @@ export class ChatsController {
         }
     }
 
-    @Get('inbox')
+    @Get('@me')
     async getMyAllChats(@Req() req: RequestWithUser, @Res() res: Response) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
