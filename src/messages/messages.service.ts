@@ -68,8 +68,10 @@ export class MessagesService {
 
     return this.prisma.message.create({
       data: {
-        chatId,
         body,
+        chat: {
+          connect: { id: chatId },
+        },
         user: {
           connect: { id: userId },
         },

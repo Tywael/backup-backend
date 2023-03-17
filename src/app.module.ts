@@ -8,7 +8,6 @@ import { ChatsModule } from './chats/chats.module';
 import { ChannelsModule } from './channels/channels.module';
 import { GamesModule } from './games/games.module';
 import { FriendsModule } from './friends/friends.modules';
-import { MessagesController } from './messages/messages.controller';
 import { MessagesModule } from './messages/messages.module';
 
 @Module({
@@ -24,7 +23,7 @@ import { MessagesModule } from './messages/messages.module';
     FriendsModule,
     MessagesModule,
   ],
-  controllers: [AppController, MessagesController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
