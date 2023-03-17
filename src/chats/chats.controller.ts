@@ -5,8 +5,10 @@ import { AuthMiddleware } from 'src/users/users.middleware';
 import { NextFunction, Response } from 'express';
 import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
 import { resolve } from 'path';
+import { ApiTags, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
 
 @Controller('chats')
+@ApiTags('Chats')
 export class ChatsController {
     constructor(
         private chatsService: ChatsService,

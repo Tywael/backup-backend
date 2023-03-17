@@ -7,10 +7,29 @@ import { CreateMessageDto } from './dto/messages.dto';
 export class MessagesService {
   constructor(private prisma: PrismaService) {}
 
+  async isOwner(userId: string, messageId: string): Promise<boolean> {
+    const message = await this.prisma.message.findUnique({
+      where: {
+        id: messageId,
+      },
+    });
+
+    if (!message) {
+      throw new BadRequestException('Message does not exist');
+    }
+
+    return message.userId === userId;
+  }
+
   async userExists(id: string): Promise<boolean> {
     const user = await this.prisma.user.findUnique({ where: { id } });
     return Boolean(user);
   }  
+
+  async chatExists(id: string): Promise<boolean> {
+    const chat = await this.prisma.chat.findUnique({ where: { id } });
+    return Boolean(chat);
+  }
 
   async findAll(): Promise<Message[]> {
     return this.prisma.message.findMany();
@@ -25,6 +44,11 @@ export class MessagesService {
   }
 
   async findByChatId(chatId: string): Promise<Message[]> {
+
+    if (!(await this.chatExists(chatId))) {
+      throw new BadRequestException('Chat does not exist');
+    }
+
     return this.prisma.message.findMany({
       where: {
         chatId,
@@ -33,6 +57,10 @@ export class MessagesService {
   }
 
   async findByChannelId(channelId: string): Promise<Message[]> {
+    if (!(await this.chatExists(channelId))) {
+      throw new BadRequestException('Channel does not exist');
+    }
+
     const chat = await this.prisma.chat.findUnique({
       where: {
         id: channelId,
@@ -66,6 +94,10 @@ export class MessagesService {
       throw new BadRequestException('User does not exist');
     }
 
+    if (!(await this.chatExists(chatId))) {
+      throw new BadRequestException('Chat does not exist');
+    }
+
     return this.prisma.message.create({
       data: {
         body,
@@ -79,10 +111,15 @@ export class MessagesService {
     });
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(userId: string, messageId): Promise<void> {
+
+    if (!(await this.isOwner(userId, messageId))) {
+      throw new BadRequestException('You are not the owner of this message');
+    }
+
     await this.prisma.message.delete({
       where: {
-        id,
+        id: messageId,
       },
     });
   }
