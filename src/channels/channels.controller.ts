@@ -39,13 +39,19 @@ export class ChannelsController {
         }
     }
 
-    @Get(':channelid')
-    async getChannelsById(@Param('channelid', ParseUUIDPipe) channelId: string): Promise<Chat> {
+    @Get(':id')
+    async getChannelsById(
+        @Param('id', ParseUUIDPipe) channelId: string
+        ): Promise<Chat> {
         return await this.channelsService.getChannelById(channelId);
     }
 
     @Post('create')
-    async createChat(@Body() data, @Req() req: RequestWithUser, @Res() res: Response) {
+    async create(
+        @Body() data, 
+        @Req() req: RequestWithUser, 
+        @Res() res: Response
+        ) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
         if (!user) {
@@ -57,7 +63,7 @@ export class ChannelsController {
     }
 
     @Post('join')
-    async joinChannel(@Body() data: { chatid: string }, @Req() req: RequestWithUser, @Res() res: Response) {
+    async join(@Body() data: { chatid: string }, @Req() req: RequestWithUser, @Res() res: Response) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
         if (!user) {
@@ -69,15 +75,18 @@ export class ChannelsController {
     }
 
     @Patch(':id')
-    async updateChat(
+    async update(
         @Param('id', ParseUUIDPipe) channelId: string,
         @Body() data: Chat,
     ): Promise<Chat> {
         return await this.channelsService.updateChannel(channelId, data);
     }
 
-    @Delete(':channelid')
-    async deleteChannel(@Param('channelid', ParseUUIDPipe) chatId: string, @Req() req: RequestWithUser, @Res() res: Response) {      
+    @Delete(':id')
+    async delete(
+        @Param('id', ParseUUIDPipe) chatId: string, 
+        @Req() req: RequestWithUser, 
+        @Res() res: Response) {      
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
         if (!user) {

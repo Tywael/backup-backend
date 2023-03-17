@@ -39,13 +39,18 @@ export class ChatsController {
         }
     }
 
-    @Get(':chatid')
-    async getChatsById(@Param('chatid', ParseUUIDPipe) chatId: string): Promise<Chat> {
+    @Get(':id')
+    async getChatsById(
+        @Param('id', ParseUUIDPipe) chatId: string
+    ): Promise<Chat> {
         return await this.chatsService.getChatById(chatId);
     }
 
     @Post('create')
-    async createChat(@Body() data: { userid: string }, @Req() req: RequestWithUser, @Res() res: Response) {
+    async create(
+        @Body() data: { userid: string },
+        @Req() req: RequestWithUser, 
+        @Res() res: Response) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
         if (!user) {
@@ -57,15 +62,19 @@ export class ChatsController {
     }
 
     @Patch(':id')
-    async updateChat(
+    async update(
         @Param('id', ParseUUIDPipe) chatId: string,
         @Body() data: Chat,
     ): Promise<Chat> {
         return await this.chatsService.updateChat(chatId, data);
     }
 
-    @Delete(':chatid')
-    async deleteChat(@Param('chatid', ParseUUIDPipe) chatId: string, @Req() req: RequestWithUser, @Res() res: Response) {      
+    @Delete(':id')
+    async delete(
+        @Param('id', ParseUUIDPipe) chatId: string, 
+        @Req() req: RequestWithUser, 
+        @Res() res: Response
+        ) {      
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
         if (!user) {
