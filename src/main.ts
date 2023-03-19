@@ -7,13 +7,16 @@ import * as dotenv from 'dotenv';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Load .env
+  dotenv.config();
+
   // Set the base path for the app
   app.setGlobalPrefix('api');
 
   app.use(cookieParser());
 
   // Swagger
-  if (process.env.ENVIRONMENT !== "development") { // a remplacer par "=== LeBonNomQueJaiPasTrouve"
+  if (process.env.ENVIRONMENT === "development") {
     const config = new DocumentBuilder()
       .setTitle('42Pong')
       .setDescription('4:04 Squad - ft_transcendence')
@@ -23,9 +26,6 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
   }
-  
-  // Load .env
-  dotenv.config();
 
   app.enableCors({
     origin: process.env.WEB_URL,
