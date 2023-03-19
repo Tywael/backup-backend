@@ -1,12 +1,15 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { Chat, ChatType, UserChatStatus, UserStatus } from '@prisma/client';
-import { identity } from 'rxjs';
+import { Chat, ChatType, UserChatStatus } from '@prisma/client';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ChannelsService {
     remove: any;
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService, 
+        private usersService: UsersService
+    ) {}
 
     async getAllChannels(): Promise<Chat[] | null> {
         const chat = await this.prisma.chat.findMany({
@@ -93,6 +96,12 @@ export class ChannelsService {
 
     
     async deletechanel(chatId: string, userId: string): Promise<Chat | null> {
+        // Check if channel exist
+        const channel = await this.prisma.chat.findUnique({ where: { id: chatId } });
+        if (!channel) {
+            throw new BadRequestException("Channel not found");
+        }
+
         const user = await this.prisma.user.findUnique({
             where: {
                 id: userId

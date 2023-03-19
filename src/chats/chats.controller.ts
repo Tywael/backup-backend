@@ -4,8 +4,8 @@ import { Chat, User } from '@prisma/client';
 import { AuthMiddleware } from 'src/users/users.middleware';
 import { NextFunction, Response } from 'express';
 import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
-import { resolve } from 'path';
 import { ApiTags, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
+import { CreateChatDto } from './dto/chats.dto';
 
 @Controller('chats')
 @ApiTags('Chats')
@@ -41,22 +41,33 @@ export class ChatsController {
 
     @Get(':id')
     async getChatsById(
-        @Param('id', ParseUUIDPipe) chatId: string
-    ): Promise<Chat> {
-        return await this.chatsService.getChatById(chatId);
-    }
-
-    @Post('create')
-    async create(
-        @Body() data: { userid: string },
-        @Req() req: RequestWithUser, 
-        @Res() res: Response) {
+        @Param('id', ParseUUIDPipe) chatId: string,
+        @Req() req: RequestWithUser,
+        @Res() res: Response,
+    ) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
         if (!user) {
             res.status(401).send({ message: 'unauthorized' });
         } else {
-            const chat = await this.chatsService.createChat({ user1Id: user.id, user2Id: data.userid });
+            const chat = await this.chatsService.getChatById(chatId);
+            res.send({ chat });
+        }
+    }
+
+    @Post('create')
+    @ApiOkResponse({ type: CreateChatDto })
+    async create(
+        @Body() data: CreateChatDto,
+        @Req() req: RequestWithUser, 
+        @Res() res: Response
+    ) {
+        await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+        const user = req.user;
+        if (!user) {
+            res.status(401).send({ message: 'unauthorized' });
+        } else {
+            const chat = await this.chatsService.createChat({ user1Id: user.id, user2Id: data.user2Id });
             res.send({ chat });
         }
     }
