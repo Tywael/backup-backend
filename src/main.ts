@@ -13,7 +13,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Swagger
-  if (process.env.NODE_ENV !== 'development') { // a remplacer par "=== LeBonNomQueJaiPasTrouve"
+  if (process.env.ENVIRONMENT !== "development") { // a remplacer par "=== LeBonNomQueJaiPasTrouve"
     const config = new DocumentBuilder()
       .setTitle('42Pong')
       .setDescription('4:04 Squad - ft_transcendence')
