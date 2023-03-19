@@ -4,4 +4,4 @@ import { SocketsGateway } from './socket.gateway';
 @Module({
   providers: [SocketsGateway],
 })
-export class SocketModule {}
+export class SocketsModule {}
