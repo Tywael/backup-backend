@@ -43,7 +43,8 @@ export class ChannelsService {
         return chats
     }
 
-    async createChannel({ userId }: { userId: string }): Promise<Chat | null> {
+    async createChannel(CreateChannelDto): Promise<Chat | null> {
+        const userId = CreateChannelDto.userId;
         if (!userId) {
             console.log("error: userIds incorect");
             return null;

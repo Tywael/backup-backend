@@ -6,6 +6,7 @@ import { NextFunction, Response } from 'express';
 import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
 import { resolve } from 'path';
 import { ApiTags, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
+import { CreateChannelDto } from './dto/channels.dto';
 
 @Controller('channels')
 @ApiTags('Channels')
@@ -47,8 +48,9 @@ export class ChannelsController {
     }
 
     @Post('create')
+    @ApiOkResponse({ type: CreateChannelDto })
     async create(
-        @Body() data, 
+        @Body() data: CreateChannelDto, 
         @Req() req: RequestWithUser, 
         @Res() res: Response
         ) {
@@ -63,7 +65,11 @@ export class ChannelsController {
     }
 
     @Post('join')
-    async join(@Body() data: { chatid: string }, @Req() req: RequestWithUser, @Res() res: Response) {
+    async join(
+        @Body() data: { chatid: string }, 
+        @Req() req: RequestWithUser, 
+        @Res() res: Response
+    ) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
         if (!user) {

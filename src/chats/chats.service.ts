@@ -108,7 +108,9 @@ export class ChatsService {
     return result
   }
 
-  async createChat({ user1Id, user2Id }: { user1Id: string, user2Id: string }): Promise<Chat | void> {
+  async createChat(CreateChatDto): Promise<Chat | void> {
+    const { user1Id, user2Id } = CreateChatDto;
+    
     if (!user1Id || !user2Id || (user1Id == user2Id)) {
       console.log("error: userIds incorect");
       return null;
