@@ -13,14 +13,16 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Swagger
-  const config = new DocumentBuilder()
-    .setTitle('42Pong')
-    .setDescription('4:04 Squad - ft_transcendence')
-    .setVersion('1.0')
-    .build();
+  if (process.env.NODE_ENV !== 'development') { // a remplacer par "=== LeBonNomQueJaiPasTrouve"
+    const config = new DocumentBuilder()
+      .setTitle('42Pong')
+      .setDescription('4:04 Squad - ft_transcendence')
+      .setVersion('1.0')
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+  }
   
   // Load .env
   dotenv.config();
