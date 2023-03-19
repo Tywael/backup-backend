@@ -9,6 +9,7 @@ import { ChannelsModule } from './channels/channels.module';
 import { GamesModule } from './games/games.module';
 import { FriendsModule } from './friends/friends.modules';
 import { MessagesModule } from './messages/messages.module';
+import { SocketsGateway } from './socket/socket.gateway';
 
 @Module({
   imports: [
@@ -24,6 +25,6 @@ import { MessagesModule } from './messages/messages.module';
     MessagesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SocketsGateway,],
 })
 export class AppModule {}
