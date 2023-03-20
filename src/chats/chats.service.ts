@@ -8,7 +8,7 @@ export class ChatsService {
   remove: any;
   constructor(
     private prisma: PrismaService,
-    private usersService: UsersService
+    private usersService: UsersService,
   ) { }
 
   async chatExists(user1Id: string, user2Id: string): Promise<boolean> {
@@ -42,15 +42,23 @@ export class ChatsService {
       console.log(err);
       return null;
     });
+
+    console.log(chat)
+
     return chat;
   }
 
   async getChatById(chatId: string): Promise<Chat> {
-    return await this.prisma.chat.findUnique({
+    const chat = this.prisma.chat.findUnique({
       where: {
         id: chatId
+      },
+      include: {
+        users: true
       }
     });
+    console.log(chat);
+    return chat;
   }
 
   async getChatByUser(userTofindId: string): Promise<Chat[] | null> {
@@ -149,6 +157,7 @@ export class ChatsService {
       console.log(err);
       return null;
     });
+
     return chat;
   }
 
@@ -209,6 +218,9 @@ export class ChatsService {
     }).catch((err) => {
       throw new BadRequestException(err);
     });
+
+    // TODO: Remove user from socket room
+
     return deleted;
   }
 }

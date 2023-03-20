@@ -29,6 +29,54 @@ export class SocketsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
+  // Get socket by chat
+  async getSocketIdByChatId(chatId: string): Promise<string>
+  {
+    const roomName = `chat-${chatId}`;
+    const room = this.server.sockets.adapter.rooms.get(roomName);
+    if (room) {
+      const socketId = room.values().next().value;
+      return socketId;
+    } else {
+      return '';
+    }
+  }
+
+  // new chat
+  async createSocketRoom(chatId: string, clientId: string)
+  {
+    const roomName = `chat-${chatId}`;
+    const socket = this.server.of('/').sockets.get(clientId);
+    if (socket) {
+      socket.join(roomName);
+      this.logger.log(`Client ${clientId} added to socket room ${roomName}`);
+    } else {
+      this.logger.error(`Client ${clientId} not found`);
+    }
+  }
+
+  // delete chat
+  async deleteSocketRoom(chatId: string, clientId: string)
+  {
+    const roomName = `chat-${chatId}`;
+    const socket = this.server.of('/').sockets.get(clientId);
+    if (socket) {
+      socket.leave(roomName);
+      this.logger.log(`Client ${clientId} removed from socket room ${roomName}`);
+    } else {
+      this.logger.error(`Client ${clientId} not found`);
+    }
+  }
+
+  @SubscribeMessage('joinRoom')
+  handleJoinRoom(client: any, payload: any): string {
+    this.logger.log(`Received joinRoom from client: ${payload}`);
+    const roomName = `chat-${payload.chatId}`;
+    client.join(roomName);
+    return 'Joined room';
+  }
+  
+
   @SubscribeMessage('message')
   handleMessage(client: any, payload: any): string {
     this.logger.log(`Received message from client: ${payload}`);

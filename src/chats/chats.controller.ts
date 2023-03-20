@@ -6,6 +6,7 @@ import { NextFunction, Response } from 'express';
 import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
 import { ApiTags, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
 import { CreateChatDto } from './dto/chats.dto';
+import { SocketsGateway } from 'src/socket/socket.gateway';
 
 @Controller('chats')
 @ApiTags('Chats')
@@ -13,7 +14,8 @@ export class ChatsController {
     constructor(
         private chatsService: ChatsService,
         private authMiddleware: AuthMiddleware,
-        ) {}
+        private socketGateway: SocketsGateway,
+    ) {}
 
     @Get()
     async getAllChats(@Req() req: RequestWithUser, @Res() res: Response) {
@@ -50,7 +52,11 @@ export class ChatsController {
         if (!user) {
             res.status(401).send({ message: 'unauthorized' });
         } else {
-            const chat = await this.chatsService.getChatById(chatId);
+            let chat = await this.chatsService.getChatById(chatId);
+            if (chat) {
+                const room = await this.socketGateway.getSocketIdByChatId(chat.id);
+                console.log(room)
+            }
             res.send({ chat });
         }
     }
@@ -68,6 +74,11 @@ export class ChatsController {
             res.status(401).send({ message: 'unauthorized' });
         } else {
             const chat = await this.chatsService.createChat({ user1Id: user.id, user2Id: data.userId });
+            // Add user to socket room
+            if (chat) {    
+                this.socketGateway.createSocketRoom(chat.id, user.id);
+                this.socketGateway.createSocketRoom(chat.id, data.userId);
+            }
             res.send({ chat });
         }
     }
