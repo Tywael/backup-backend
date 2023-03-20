@@ -58,7 +58,7 @@ export class ChatsController {
     @Post('create')
     @ApiOkResponse({ type: CreateChatDto })
     async create(
-        @Body() data: CreateChatDto,
+        @Body() data: {userId: string},
         @Req() req: RequestWithUser, 
         @Res() res: Response
     ) {
