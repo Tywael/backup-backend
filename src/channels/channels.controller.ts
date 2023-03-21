@@ -6,7 +6,7 @@ import { NextFunction, Response } from 'express';
 import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
 import { resolve } from 'path';
 import { ApiTags, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
-import { CreateChannelDto } from './dto/channels.dto';
+import { CreateChannelDto, JoinChannelDto, memberStatusDto } from './dto/channels.dto';
 
 @Controller('channels')
 @ApiTags('Channels')
@@ -65,8 +65,9 @@ export class ChannelsController {
     }
 
     @Post('join')
+    @ApiOkResponse({ type: JoinChannelDto })
     async join(
-        @Body() data: { chatid: string }, 
+        @Body() data: JoinChannelDto, 
         @Req() req: RequestWithUser, 
         @Res() res: Response
     ) {
@@ -75,12 +76,32 @@ export class ChannelsController {
         if (!user) {
             res.status(401).send({ message: 'unauthorized' });
         } else {
-            const channel = await this.channelsService.joinChannel(data.chatid, user.id);
+            const channel = await this.channelsService.joinChannel(data.chatId, user.id);
             res.send({ channel });
         }
     }
 
+    @Patch('memberStatus/:id')
+    @ApiOkResponse({ type: memberStatusDto })
+    async memberStatus(
+        @Param('id', ParseUUIDPipe) userId: string,
+        @Body() data: memberStatusDto, 
+        @Req() req: RequestWithUser, 
+        @Res() res: Response
+    ) {
+        await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
+        const user = req.user;
+        if (!user) {
+            res.status(401).send({ message: 'unauthorized' });
+        } else {
+            const channel = await this.channelsService.memberStatus(user.id, data);
+            res.send({ channel });
+        }
+    }
+
+
     @Patch(':id')
+    @ApiOkResponse({ type: JoinChannelDto })
     async update(
         @Param('id', ParseUUIDPipe) channelId: string,
         @Body() data: Chat,

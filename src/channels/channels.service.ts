@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { Chat, ChatType, UserChatStatus } from '@prisma/client';
+import { Chat, ChatType, UserChatPermission, UserChatStatus } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
+import { memberStatusDto } from './dto/channels.dto';
 
 @Injectable()
 export class ChannelsService {
@@ -89,6 +90,38 @@ export class ChannelsService {
             }
         })
         return channel;
+    }
+
+    async isPermission(permission: string): Promise <boolean> {
+        if (permission == UserChatPermission.MUTED || permission == UserChatPermission.BANNED || permission == UserChatPermission.COMPLIANT || permission == UserChatPermission.KICKED)
+            return true;
+        return false;
+    }
+
+    async memberStatus(userId: string, data: memberStatusDto): Promise <Chat | null> {
+        const channel = await this.prisma.chat.findUnique({ where: { id: data.chatId } });
+        const userChannel = await this.prisma.userChat.findMany({ where: { chatId: data.chatId, userId: userId } });
+        if (userChannel.length != 1)
+            return null;
+        if (userChannel[0].status == UserChatStatus.OWNER || userChannel[0].status == UserChatStatus.ADMIN) {
+            const memberChannel = await this.prisma.userChat.findMany({ where: { chatId: data.chatId, userId: data.userId } });
+            if (memberChannel.length != 1) {
+                if (userChannel[0].status == UserChatStatus.OWNER) {
+                    if (data.status == UserChatStatus.ADMIN || data.status == UserChatStatus.MEMBER) {
+                        memberChannel[0].status = data.status;
+                    }
+                    if (await this.isPermission(data.permission)) {
+                        memberChannel[0].status = UserChatStatus.MEMBER;
+                        memberChannel[0].permission = data.permission;
+                    }
+                }
+                if (userChannel[0].status == UserChatStatus.ADMIN && memberChannel[0].status == UserChatStatus.MEMBER) {
+                    if (await this.isPermission(data.permission)) {
+                        memberChannel[0].permission = data.permission;
+                    }                   
+                }
+            }
+        }
     }
 
     async updateChannel(chatId: string, data: Chat): Promise<Chat> {

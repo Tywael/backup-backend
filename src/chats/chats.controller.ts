@@ -67,7 +67,7 @@ export class ChatsController {
         if (!user) {
             res.status(401).send({ message: 'unauthorized' });
         } else {
-            const chat = await this.chatsService.createChat({ user1Id: user.id, user2Id: data.user2Id });
+            const chat = await this.chatsService.createChat({ user1Id: user.id, user2Id: data.userId });
             res.send({ chat });
         }
     }
