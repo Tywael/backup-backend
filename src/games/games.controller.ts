@@ -96,7 +96,7 @@ export class GamesController {
     }
   }
 
-  @Delete(':gameId/delete')
+  @Delete(':gameId')
   async deleteGame(@Req() req: RequestWithUser, @Res() res: Response, @Param('gameId') gameId: string) {
     await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
     const user = req.user;
