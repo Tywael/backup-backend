@@ -10,6 +10,7 @@ import { CreateChannelDto } from './dto/channels.dto';
 
 @Controller('channels')
 @ApiTags('Channels')
+@ApiResponse({ status: 401, description: 'Unauthorized'})
 export class ChannelsController {
     constructor(
         private channelsService: ChannelsService,

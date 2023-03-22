@@ -5,10 +5,11 @@ import { AuthMiddleware } from 'src/users/users.middleware';
 import { NextFunction, Response } from 'express';
 import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
 import { ApiTags, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
-import { CreateChatDto } from './dto/chats.dto';
+import { CreateChatDto, ChatDto } from './dto/chats.dto';
 
 @Controller('chats')
 @ApiTags('Chats')
+@ApiResponse({ status: 401, description: 'Unauthorized'})
 export class ChatsController {
     constructor(
         private chatsService: ChatsService,
@@ -16,6 +17,7 @@ export class ChatsController {
         ) {}
 
     @Get()
+    @ApiOkResponse({description: 'Returns an Array of existing chats', type: ChatDto, isArray: true })
     async getAllChats(@Req() req: RequestWithUser, @Res() res: Response) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
@@ -28,6 +30,7 @@ export class ChatsController {
     }
 
     @Get('@me')
+    @ApiOkResponse({description: 'Returns an Array of your open chats', type: ChatDto, isArray: true })
     async getMyAllChats(@Req() req: RequestWithUser, @Res() res: Response) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
@@ -40,6 +43,7 @@ export class ChatsController {
     }
 
     @Get(':id')
+    @ApiOkResponse({description: 'Returns the information of a chat', type: ChatDto })
     async getChatsById(
         @Param('id', ParseUUIDPipe) chatId: string,
         @Req() req: RequestWithUser,
@@ -55,12 +59,12 @@ export class ChatsController {
         }
     }
 
-    @Post('create')
+    @Post('create') // 201 (undocumented) mais pas de chat cree ?
     @ApiOkResponse({ type: CreateChatDto })
     async create(
         @Body() data: CreateChatDto,
         @Req() req: RequestWithUser, 
-        @Res() res: Response
+        @Res() res: Response,
     ) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
@@ -72,7 +76,7 @@ export class ChatsController {
         }
     }
 
-    @Patch(':id')
+    @Patch(':id')   
     async update(
         @Param('id', ParseUUIDPipe) chatId: string,
         @Body() data: Chat,
