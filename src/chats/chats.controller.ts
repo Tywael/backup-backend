@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Patch, UseGuards, Req, Res} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Patch, UseGuards, Req, Res } from '@nestjs/common';
 import { ChatsService } from './chats.service';
 import { Chat, User } from '@prisma/client';
 import { AuthMiddleware } from 'src/users/users.middleware';
@@ -7,6 +7,8 @@ import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
 import { ApiTags, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
 import { CreateChatDto } from './dto/chats.dto';
 import { SocketsGateway } from 'src/socket/socket.gateway';
+import { ConnectedSocket } from '@nestjs/websockets';
+import { Socket } from 'socket.io';
 
 @Controller('chats')
 @ApiTags('Chats')
@@ -15,7 +17,7 @@ export class ChatsController {
         private chatsService: ChatsService,
         private authMiddleware: AuthMiddleware,
         private socketGateway: SocketsGateway,
-    ) {}
+    ) { }
 
     @Get()
     async getAllChats(@Req() req: RequestWithUser, @Res() res: Response) {
@@ -55,17 +57,29 @@ export class ChatsController {
             let chat = await this.chatsService.getChatById(chatId);
             if (chat) {
                 const room = await this.socketGateway.getSocketIdByChatId(chat.id);
-                console.log(room)
+                if (room) {
+                    // join socket room
+                    await this.socketGateway.joinSocketRoom(chat.id, user.id);
+                    res.send({ chat, room });
+                } else {
+                    // create socket room
+                    await this.socketGateway.createSocketRoom(chat.id);
+                    const newRoom = await this.socketGateway.getSocketIdByChatId(chat.id);
+                    await this.socketGateway.joinSocketRoom(chat.id, user.id);
+                    res.send({ chat, room: newRoom });
+                }
+            } else {
+                res.status(404).send({ message: 'Chat room not found' });
             }
-            res.send({ chat });
         }
     }
+
 
     @Post('create')
     @ApiOkResponse({ type: CreateChatDto })
     async create(
-        @Body() data: {userId: string},
-        @Req() req: RequestWithUser, 
+        @Body() data: { userId: string },
+        @Req() req: RequestWithUser,
         @Res() res: Response
     ) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
@@ -74,12 +88,13 @@ export class ChatsController {
             res.status(401).send({ message: 'unauthorized' });
         } else {
             const chat = await this.chatsService.createChat({ user1Id: user.id, user2Id: data.userId });
-            // Add user to socket room
-            if (chat) {    
-                this.socketGateway.createSocketRoom(chat.id, user.id);
-                this.socketGateway.createSocketRoom(chat.id, data.userId);
-            }
-            res.send({ chat });
+            // create socket room
+            if (chat) {
+                await this.socketGateway.createSocketRoom(chat.id);
+                res.send({ chat });
+            } else {
+                res.status(404).send({ message: 'Chat not created' });
+            }            
         }
     }
 
@@ -93,17 +108,19 @@ export class ChatsController {
 
     @Delete(':id')
     async delete(
-        @Param('id', ParseUUIDPipe) chatId: string, 
-        @Req() req: RequestWithUser, 
+        @Param('id', ParseUUIDPipe) chatId: string,
+        @Req() req: RequestWithUser,
         @Res() res: Response
-        ) {      
+    ) {
         await new Promise(resolve => this.authMiddleware.use(req, res, resolve));
         const user = req.user;
         if (!user) {
-          res.status(401).send({ message: 'Unauthorized' });
+            res.status(401).send({ message: 'Unauthorized' });
         } else {
-          const chats =  await this.chatsService.deleteChat(chatId, user.id);
-          res.send({ chats });
+            const chat = await this.chatsService.deleteChat(chatId, user.id);
+            // delete socket room
+            await this.socketGateway.deleteSocketRoom(chatId);
+            res.send({ chat });
         }
     }
 }
