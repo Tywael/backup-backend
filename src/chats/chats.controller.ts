@@ -1,14 +1,12 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Patch, UseGuards, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Patch, Req, Res } from '@nestjs/common';
 import { ChatsService } from './chats.service';
-import { Chat, User } from '@prisma/client';
+import { Chat } from '@prisma/client';
 import { AuthMiddleware } from 'src/users/users.middleware';
-import { NextFunction, Response } from 'express';
+import { Response } from 'express';
 import { RequestWithUser } from 'src/interfaces/request-with-user.interface';
-import { ApiTags, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreateChatDto } from './dto/chats.dto';
 import { SocketsGateway } from 'src/socket/socket.gateway';
-import { ConnectedSocket } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
 
 @Controller('chats')
 @ApiTags('Chats')

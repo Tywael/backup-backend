@@ -43,8 +43,6 @@ export class ChatsService {
       return null;
     });
 
-    console.log(chat)
-
     return chat;
   }
 
@@ -57,7 +55,6 @@ export class ChatsService {
         users: true
       }
     });
-    console.log(chat);
     return chat;
   }
 
@@ -119,7 +116,7 @@ export class ChatsService {
   async createChat({ user1Id, user2Id }: { user1Id: string, user2Id: string }): Promise<Chat | void> {
     
     if (!user1Id || !user2Id || (user1Id == user2Id)) {
-      console.log("error: userIds incorect");
+      throw new BadRequestException('Invalid user ID(s)');
       return null;
     }
 
