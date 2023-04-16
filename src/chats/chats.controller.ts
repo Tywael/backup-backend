@@ -14,7 +14,7 @@ export class ChatsController {
     constructor(
         private chatsService: ChatsService,
         private authMiddleware: AuthMiddleware,
-        private socketGateway: SocketsGateway,
+        private readonly socketGateway: SocketsGateway,
     ) { }
 
     @Get()
@@ -58,13 +58,13 @@ export class ChatsController {
                 if (room) {
                     // join socket room
                     await this.socketGateway.joinSocketRoom(chat.id, user.id);
-                    res.send({ chat, room });
+                    res.send({ data: { chat, room } });
                 } else {
                     // create socket room
                     await this.socketGateway.createSocketRoom(chat.id);
                     const newRoom = await this.socketGateway.getSocketIdByChatId(chat.id);
                     await this.socketGateway.joinSocketRoom(chat.id, user.id);
-                    res.send({ chat, room: newRoom });
+                    res.send({ data: { chat, room: newRoom } });
                 }
             } else {
                 res.status(404).send({ message: 'Chat room not found' });

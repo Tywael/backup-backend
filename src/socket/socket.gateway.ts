@@ -17,7 +17,8 @@ export class SocketsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
 
   private logger: Logger = new Logger('SocketGateway');
 
-  private connectedRooms = new Map<string, Set<string>>(); 
+  private connectedRooms = new Map<string, Set<string>>();
+  private connectedClients = new Set<string>();
 
   // Define the init method as required by the OnGatewayInit interface
   public init(server: Server) {
@@ -28,19 +29,26 @@ export class SocketsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     this.logger.log('WebSocket server initialized');
   }
 
-  handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
-    this.logger.log(`Connected clients: ${JSON.stringify(this.server.sockets.sockets)}`);
+  async handleConnection(client: Socket) {
+    if (!this.connectedClients.has(client.id)) {
+      this.connectedClients.add(client.id);
+      this.logger.log(`Client connected: ${client.id}`);
+      this.logger.log(`Connected clients: ${JSON.stringify(this.server.sockets.sockets)}`);
+    }
   }
-
-  handleDisconnect(socket: Socket) {
-    this.logger.log(`Client disconnected: ${socket.id}`);
-    const chatId = this.getChatIdFromSocket(socket);
-    if (chatId) {
-      this.logger.log(`Client ${socket.id} left chat ${chatId}`);
+  
+  async handleDisconnect(socket: Socket) {
+    if (this.connectedClients.has(socket.id)) {
+      this.connectedClients.delete(socket.id);
+      this.logger.log(`Client disconnected: ${socket.id}`);
+      const chatId = await this.getChatIdFromSocket(socket);
+      if (chatId) {
+        this.logger.log(`Client ${socket.id} left chat ${chatId}`);
+      }
     }
   }
 
+  
   async getChatIdFromSocket(socket: Socket): Promise<string | null> {
     const roomName = await socket.rooms.values().next().value;
     if (roomName) {
