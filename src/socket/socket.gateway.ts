@@ -13,7 +13,8 @@ import { Logger } from '@nestjs/common';
 })
 export class SocketsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
-  @WebSocketServer() server: Server;
+  @WebSocketServer()
+  private server: Server;
 
   private logger: Logger = new Logger('SocketGateway');
 
@@ -22,7 +23,7 @@ export class SocketsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
 
   // Define the init method as required by the OnGatewayInit interface
   public init(server: Server) {
-    this.logger.log('Sockets gateway initialized');
+    this.server = server;
   }
 
   afterInit(server: any) {
@@ -33,7 +34,6 @@ export class SocketsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     if (!this.connectedClients.has(client.id)) {
       this.connectedClients.add(client.id);
       this.logger.log(`Client connected: ${client.id}`);
-      this.logger.log(`Connected clients: ${JSON.stringify(this.server.sockets.sockets)}`);
     }
   }
   
@@ -41,10 +41,6 @@ export class SocketsGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     if (this.connectedClients.has(socket.id)) {
       this.connectedClients.delete(socket.id);
       this.logger.log(`Client disconnected: ${socket.id}`);
-      const chatId = await this.getChatIdFromSocket(socket);
-      if (chatId) {
-        this.logger.log(`Client ${socket.id} left chat ${chatId}`);
-      }
     }
   }
 

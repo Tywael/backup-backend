@@ -51,8 +51,15 @@ async function bootstrap() {
     path: '/ws', // This should match the path you've configured in your Nginx proxy
   });
 
-  // Register the Socket.IO gateway with the Socket.IO server instance
-  app.get(SocketsGateway).init(io);
+  const socketsGateway = app.get(SocketsGateway);
+  socketsGateway.init(io);
+
+  io.on('connection', (socket) => {
+    logger.log(`Client connected: ${socket.id}`);
+    socket.on('disconnect', () => {
+      logger.log(`Client disconnected: ${socket.id}`);
+    });
+  });
 
   await app.listen(3001);
 }
